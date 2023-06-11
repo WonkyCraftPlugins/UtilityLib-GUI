@@ -53,6 +53,19 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addDefaultImplementationEntries>false</addDefaultImplementationEntries>
+							<addDefaultSpecificationEntries>false</addDefaultSpecificationEntries>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
 		</plugins>
 		<resources>
 			<resource>
@@ -81,7 +94,7 @@
 		<dependency>
 			<groupId>com.github.Wonkglorg</groupId>
 			<artifactId>Utlitylib-Base</artifactId>
-			<version>1.1.0</version>
+			<version>c0ff7ccf3b</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.wonkglorg</groupId>

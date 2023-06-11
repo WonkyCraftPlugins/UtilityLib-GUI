@@ -1,9 +1,8 @@
 com\wonkglorg\utilitylib\inventory\chest\PaginationGui.class
 com\wonkglorg\utilitylib\inventory\chest\InventorySize.class
-com\wonkglorg\utilitylib\inventory\chest\ProfileManager.class
-com\wonkglorg\utilitylib\inventory\chest\MockInventory.class
 com\wonkglorg\utilitylib\inventory\chest\Button.class
 com\wonkglorg\utilitylib\inventory\chest\InventoryGUI.class
-com\wonkglorg\utilitylib\inventory\chest\MenuProfile.class
 com\wonkglorg\utilitylib\inventory\chest\Button$1.class
+com\wonkglorg\utilitylib\inventory\profile\ProfileManager.class
 com\wonkglorg\utilitylib\inventory\chest\Button$2.class
+com\wonkglorg\utilitylib\inventory\profile\MenuProfile.class
