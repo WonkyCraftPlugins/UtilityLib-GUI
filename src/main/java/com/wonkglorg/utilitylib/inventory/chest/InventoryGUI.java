@@ -1,7 +1,7 @@
 package com.wonkglorg.utilitylib.inventory.chest;
 
 import com.wonkglorg.utilitylib.inventory.profile.MenuProfile;
-import com.wonkglorg.utlitylib.base.message.Message;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -43,7 +43,7 @@ public abstract class InventoryGUI implements Listener{
 		FILLER = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
 		ItemMeta meta = FILLER.getItemMeta();
 		
-		meta.displayName(Message.color(" "));
+		meta.displayName(Component.text(" "));
 		FILLER.setItemMeta(meta);
 	}
 	
@@ -86,7 +86,17 @@ public abstract class InventoryGUI implements Listener{
 	 * @param name The name of the inventory
 	 */
 	public InventoryGUI(int size, String name, JavaPlugin plugin, MenuProfile profile) {
-		this(Bukkit.createInventory(null, size, Message.color(name)), plugin, profile);
+		this(Bukkit.createInventory(null, size, Component.text(name)), plugin, profile);
+	}
+	
+	/**
+	 * Creates a new GUI, instantiating a new inventory with the given size and name
+	 *
+	 * @param size The size of the inventory
+	 * @param name The name of the inventory
+	 */
+	public InventoryGUI(int size, Component name, JavaPlugin plugin, MenuProfile profile) {
+		this(Bukkit.createInventory(null, size, name), plugin, profile);
 	}
 	
 	/**
@@ -96,7 +106,17 @@ public abstract class InventoryGUI implements Listener{
 	 * @param name The name of the inventory
 	 */
 	public InventoryGUI(InventorySize inventorySize, String name, JavaPlugin plugin, MenuProfile profile) {
-		this(Bukkit.createInventory(null, inventorySize.getSize(), Message.color(name)), plugin, profile);
+		this(Bukkit.createInventory(null, inventorySize.getSize(), Component.text(name)), plugin, profile);
+	}
+	
+	/**
+	 * Creates a new GUI, instantiating a new inventory with the given size and name
+	 *
+	 * @param inventorySize The size of the inventory
+	 * @param name The name of the inventory
+	 */
+	public InventoryGUI(InventorySize inventorySize, Component name, JavaPlugin plugin, MenuProfile profile) {
+		this(Bukkit.createInventory(null, inventorySize.getSize(), name), plugin, profile);
 	}
 	
 	public abstract void addComponents();

@@ -92,17 +92,6 @@
 	
 	<dependencies>
 		<dependency>
-			<groupId>com.github.Wonkglorg</groupId>
-			<artifactId>Utlitylib-Base</artifactId>
-			<version>1.3.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.wonkglorg</groupId>
-					<artifactId>UtilityLib-GUI</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>io.papermc.paper</groupId>
 			<artifactId>paper-api</artifactId>
 			<version>1.19.4-R0.1-SNAPSHOT</version>
