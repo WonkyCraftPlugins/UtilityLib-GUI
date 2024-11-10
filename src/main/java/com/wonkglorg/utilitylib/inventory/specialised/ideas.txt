@@ -1,0 +1,29 @@
+test all the inventories especially the ones listed below, does blastfurnace actually allow to edit stuff?
+
+
+
+check if its worth adding craft listeners? probably not...
+
+
+test some of the odd inventories.
+
+abstract horse, lectern, double chest, Jokebox, Chisseled bookshelf, loot table, merchent, player
+
+some are missing, smokter, blast furnace, droper hopper, dispenser
+
+
+
+
+add custom inventory returns that provide utility for said inventory
+
+
+
+
+
+
+
+
+
+Beacon, Cartography, Enchanter, GrindStone , Loom
+
+work but the items won't show up for some reason
