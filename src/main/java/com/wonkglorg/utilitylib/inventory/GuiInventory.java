@@ -541,23 +541,32 @@ public abstract class GuiInventory implements Listener {
         return rawSlot < view.getTopInventory().getSize() ? view.getTopInventory() : view.getBottomInventory();
     }
 
-    @EventHandler
-    public void onOpenSlotClick(InventoryClickEvent e) {
-        if (!openSlots.contains(e.getSlot())) {
-            return;
-        }
-        onClickOpenSlot.accept(e, List.of(e.getSlot()));
+
+    private void handleShiftClick(InventoryClickEvent e) {
+
+        //todo handle both shiftclick into and out of menu
     }
+
+    private void handleLeftClick(InventoryClickEvent e) {
+
+    }
+
+    public void handleRightClick(InventoryClickEvent e) {
+
+    }
+
 
     @EventHandler
     public void onClick(InventoryClickEvent e) {
         if (!inventory.equals(e.getView().getTopInventory())) {
             return;
         }
+        System.out.println("Click Action: " + e.getAction());
         if (e.getAction() == InventoryAction.COLLECT_TO_CURSOR && !e.getClickedInventory().equals(inventory)) {
             e.setCancelled(true);
             return;
         }
+
         if (!inventory.equals(e.getClickedInventory()) && e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
             if (!openSlots.isEmpty()) {
                 Map<Integer, ItemStack> slots = new HashMap<>();

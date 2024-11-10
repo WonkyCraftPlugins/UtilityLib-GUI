@@ -32,24 +32,6 @@ public abstract class GuiCrafter extends GuiInventory {
     }
 
     /**
-     * Gets the matrix slots of the inventory
-     *
-     * @param item the item to add
-     */
-    public void addOutputItem(ItemStack item) {
-        getInventory().setItem(getOutputSlot(), item);
-    }
-
-    /**
-     * Adds a button to the output slot of the inventory
-     *
-     * @param button the button to add
-     */
-    public void addOutputButton(Button button) {
-        addButton(button, getOutputSlot());
-    }
-
-    /**
      * Gets the crafting table matrix slots equivalent to
      *
      * @return the matrix slots
@@ -94,6 +76,47 @@ public abstract class GuiCrafter extends GuiInventory {
 
         if (recipe == null) return null;
         return recipe.getResult();
+    }
+
+    /**
+     * Gets the matrix slots of the inventory
+     *
+     * @param item the item to add
+     */
+    public void addOutputItem(ItemStack item) {
+        getInventory().setItem(getOutputSlot(), item);
+    }
+
+    /**
+     * Adds a button to the output slot of the inventory
+     *
+     * @param button the button to add
+     */
+    public void addOutputButton(Button button) {
+        addButton(button, getOutputSlot());
+    }
+
+
+    /**
+     * Adds an item to the primary slot of the inventory
+     *
+     * @param matrix the items to add (array of 9)
+     */
+    public void addMatrixItem(ItemStack[] matrix) {
+        for (int i = 1; i < 10; i++) {
+            getInventory().setItem(i, matrix[i - 1]);
+        }
+    }
+
+    /**
+     * Adds a button to the matrix slots of the inventory
+     *
+     * @param matrix the matrix to add (array of 9)
+     */
+    public void addMatrixButton(Button[] matrix) {
+        for (int i = 1; i < 10; i++) {
+            addButton(matrix[i - 1], i);
+        }
     }
 
 
