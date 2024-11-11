@@ -61,6 +61,8 @@ public final class PaginationGui {
 
     //todo implement open slots to take from? would be pretty hard if the gui inventory handles it and not the pagination
 
+    private boolean allowInsertion = false;
+
     /**
      * Constructs a PaginationPanel to work on a given InventoryGUI
      *
@@ -522,6 +524,11 @@ public final class PaginationGui {
 
         //todo handle each seperate
         //todo make more customizeable with what buttons do what and what action runs?
+
+
+        if (!allowInsertion) {
+            return;
+        }
         switch (event.getAction()) {
             //needs those cases in case where the items being added are not the same as the ones in the panel
             case SWAP_WITH_CURSOR -> {
@@ -709,6 +716,13 @@ public final class PaginationGui {
 
     public int getEntrySize() {
         return entries.size();
+    }
+
+    /**
+     * @param allowInsertion whether to allow items to be inserted into the panel
+     */
+    public void setAllowInsertion(boolean allowInsertion) {
+        this.allowInsertion = allowInsertion;
     }
 
     /**
