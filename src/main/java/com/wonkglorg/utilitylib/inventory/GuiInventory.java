@@ -50,6 +50,11 @@ public abstract class GuiInventory implements Listener {
     };
     private final Map<Integer, Button> buttons = new HashMap<>();
 
+    /**
+     * The pagination GUIs that are part of this GUI (if any)
+     */
+    private final Set<PaginationGui> paginationGuis = new HashSet<>();
+
     protected MenuProfile profile;
     private final int maxRows = 9;
     private final int maxColumns = 6;
@@ -481,7 +486,7 @@ public abstract class GuiInventory implements Listener {
     public void destroy(Player lastViewer) {
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         //TODO test if this actually unregisters the child events otherwise creates memory leak!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!y
 
         if (onDestroy != null) {
             onDestroy.run();
@@ -527,7 +532,7 @@ public abstract class GuiInventory implements Listener {
     @EventHandler
     public void onDrag(InventoryDragEvent e) {
         List<Integer> slots = e.getRawSlots().stream().filter(s -> getInventory(e.getView(), s).equals(inventory)).toList();
-        if (slots.size() == 0) {
+        if (slots.isEmpty()) {
             return;
         }
         if (!openSlots.containsAll(slots)) {
@@ -555,6 +560,35 @@ public abstract class GuiInventory implements Listener {
 
     }
 
+    /**
+     * Checks if the slot is a slot handled by a pagination GUI
+     *
+     * @return Whether the slot is a pagination slot
+     */
+    private boolean isPaginationSlot(InventoryClickEvent e) {
+        for (PaginationGui paginationGui : paginationGuis) {
+            if (paginationGui.getSlots().contains(e.getSlot())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * Gets the pagination GUI that is handling the slot
+     *
+     * @return The pagination GUI handling the slot or null if no pagination GUI is handling the slot
+     */
+    private PaginationGui getHandlingPaginationGui(InventoryClickEvent e) {
+        for (PaginationGui paginationGui : paginationGuis) {
+            if (paginationGui.getSlots().contains(e.getSlot())) {
+                return paginationGui;
+            }
+        }
+        return null;
+    }
+
 
     @EventHandler
     public void onClick(InventoryClickEvent e) {
@@ -562,6 +596,37 @@ public abstract class GuiInventory implements Listener {
             return;
         }
         System.out.println("Click Action: " + e.getAction());
+
+        //if its a pagination button let the pagination gui handle it
+        PaginationGui paginationGui = getHandlingPaginationGui(e);
+        if (paginationGui != null) {
+
+            //if the raw slot is bigger than the top inventory size, it means the click was in the bottom inventory so invalid
+            if (e.getRawSlot() >= e.getView().getTopInventory().getSize()) return;
+
+            Button potentialButton = buttons.get(e.getRawSlot());
+            Object object = potentialButton != null ? potentialButton : getInventory().getItem(e.getRawSlot());
+            System.out.println("Object: " + object);
+
+            int position = -1;
+
+            if (object instanceof Button button) {
+                position = paginationGui.getPosition(button);
+            } else if (object instanceof ItemStack itemStack) {
+                position = paginationGui.getPosition(itemStack);
+            }
+
+            if (position == -1) {
+                position = paginationGui.getEntrySize();
+            }
+
+
+
+            paginationGui.onInventoryEvent(e, object, position);
+            return;
+        }
+
+
         if (e.getAction() == InventoryAction.COLLECT_TO_CURSOR && !e.getClickedInventory().equals(inventory)) {
             e.setCancelled(true);
             return;
@@ -626,6 +691,14 @@ public abstract class GuiInventory implements Listener {
                 button.onClick(e);
             }
         }
+    }
+
+
+    /**
+     * DOES NOT NEED TO BE CALLED MANUALLY, automatically called on {@link PaginationGui} initialization
+     */
+    public void addPaginationGui(PaginationGui paginationGui) {
+        paginationGuis.add(paginationGui);
     }
 
     @EventHandler
