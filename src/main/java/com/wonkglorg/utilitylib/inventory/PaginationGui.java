@@ -520,6 +520,7 @@ public final class PaginationGui {
         }
 
 
+        //todo handle each seperate
         //todo make more customizeable with what buttons do what and what action runs?
         switch (event.getAction()) {
             //needs those cases in case where the items being added are not the same as the ones in the panel
@@ -544,26 +545,48 @@ public final class PaginationGui {
                     return;
                 }
 
-                System.out.println("Adding item");
-                onItemInsert.accept(item.clone(), entries.size());
+                if (index >= entries.size()) {
+                    onItemInsert.accept(item.clone(), entries.size());
+                    item.setAmount(0);
+                    updatePage();
+                    return;
+                }
+
+                ItemStack itemStack = entries.get(index).getItemStack();
+                if (itemStack == null) {
+                    return;
+                }
+
+                itemStack.setAmount(itemStack.getAmount() + item.getAmount());
                 event.getCursor().setAmount(0);
                 updatePage();
             }
             case PLACE_ONE -> {
                 //when a new stack not yet in the clicked slot is added on an same item non empty slot either left click or only 1 more item till max stack
-                System.out.println("Attempt to add item");
                 var item = event.getCursor();
                 if (item == null) {
                     return;
                 }
 
-                System.out.println("Adding item");
-                onItemInsert.accept(item.clone(), entries.size());
-                event.getCursor().setAmount(0);
+                if (index >= entries.size()) {
+                    onItemInsert.accept(item.clone(), entries.size());
+                    item.setAmount(item.getAmount() - 1);
+                    updatePage();
+                    return;
+                }
+
+
+                ItemStack itemStack = entries.get(index).getItemStack();
+                if (itemStack == null) {
+                    return;
+                }
+                itemStack.setAmount(itemStack.getAmount() + 1);
+                event.getCursor().setAmount(event.getCursor().getAmount() - 1);
                 updatePage();
             }
 
             case PLACE_SOME -> {
+                //todo do the math on how many can be added to it
                 //When items of the same type in the cursor and slot are being added (anything from 2 to 63 items) only 1 and all and non is treated different
                 System.out.println("Attempt to add item");
                 var item = event.getCursor();
@@ -571,21 +594,27 @@ public final class PaginationGui {
                     return;
                 }
 
-                System.out.println("Adding item");
-                onItemInsert.accept(item.clone(), entries.size());
-                event.getCursor().setAmount(0);
+                int stackSize = item.getMaxStackSize();
+
+                ItemStack itemStack = entries.get(index).getItemStack();
+                if (itemStack == null) {
+                    return;
+                }
+
+                int amount = Math.min(stackSize - itemStack.getAmount(), item.getAmount());
+
+                itemStack.setAmount(itemStack.getAmount() + amount);
+                item.setAmount(item.getAmount() - amount);
                 updatePage();
             }
 
             case NOTHING -> {
                 //item is full nothing happens
-                System.out.println("Attempt to add item");
                 var item = event.getCursor();
                 if (item == null) {
                     return;
                 }
 
-                System.out.println("Adding item");
                 onItemInsert.accept(item.clone(), entries.size());
                 event.getCursor().setAmount(0);
                 updatePage();
@@ -689,5 +718,19 @@ public final class PaginationGui {
      * @param adder  the adder that sets the object in the gui
      */
     private record PaginationEntry(Object object, IntConsumer adder, boolean isOpen) {
+        /**
+         * Returns the objects itemstack (either directly or in the form of a buttons itemstack)
+         *
+         * @return
+         */
+        public ItemStack getItemStack() {
+            if (object instanceof ItemStack item) {
+                return item;
+            }
+            if (object instanceof Button button) {
+                return button.getItem();
+            }
+            return null;
+        }
     }
 }
