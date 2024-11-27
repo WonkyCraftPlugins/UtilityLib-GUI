@@ -1,10 +1,12 @@
 package com.wonkglorg.utilitylib.inventory;
 
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 
@@ -58,6 +60,7 @@ public final class PaginationGui {
      * A consumer that is called when an item is inserted into the panel
      */
     private BiConsumer<ItemStack, Integer> onItemInsert = (item, index) -> entries.add(index, new PaginationEntry(item, i -> gui.getInventory().setItem(i, item), false));
+    private Map<InventoryAction, Consumer<ClickData>> clickActions = new HashMap<>();
 
     //todo implement open slots to take from? would be pretty hard if the gui inventory handles it and not the pagination
 
@@ -71,6 +74,7 @@ public final class PaginationGui {
     public PaginationGui(GuiInventory gui) {
         this(gui, null);
         gui.addPaginationGui(this);
+        registerActions();
     }
 
     /**
@@ -747,4 +751,144 @@ public final class PaginationGui {
             return null;
         }
     }
+
+    /**
+     * Represents the data of a click event
+     *
+     * @param event  the click event
+     * @param gui    the pagination gui this event is for
+     * @param object the clicked object reference (Button or ItemStack)
+     * @param index  the index of the object in the entries list
+     */
+    private record ClickData(InventoryClickEvent event, PaginationGui gui, Object object, int index) {
+        public boolean isButton() {
+            return object instanceof Button;
+        }
+
+        public boolean isItem() {
+            return object instanceof ItemStack;
+        }
+    }
+
+    public void setClickAction(InventoryAction action, Consumer<ClickData> consumer) {
+        clickActions.put(action, consumer);
+    }
+
+
+    private void registerActions() {
+        clickActions.put(InventoryAction.SWAP_WITH_CURSOR, clickData -> {
+            var event = clickData.event();
+            System.out.println("Attempt to add item");
+            var item = event.getCursor();
+            if (item == null) {
+                return;
+            }
+
+            System.out.println("Adding item");
+            onItemInsert.accept(item.clone(), entries.size());
+            event.getCursor().setAmount(0);
+        });
+
+        clickActions.put(InventoryAction.PLACE_ALL, clickData -> {
+            //when a new stack not yet in the clicked slot is added on an empty slot
+            var event = clickData.event();
+            var index = clickData.index();
+            System.out.println("Attempt to add item");
+            var item = event.getCursor();
+            if (item == null) {
+                return;
+            }
+
+            if (index >= entries.size()) {
+                onItemInsert.accept(item.clone(), entries.size());
+                item.setAmount(0);
+                updatePage();
+                return;
+            }
+
+            ItemStack itemStack = entries.get(index).getItemStack();
+            if (itemStack == null) {
+                return;
+            }
+
+            itemStack.setAmount(itemStack.getAmount() + item.getAmount());
+            event.getCursor().setAmount(0);
+        });
+
+        clickActions.put(InventoryAction.PLACE_ONE, clickData -> {
+            //when a new stack not yet in the clicked slot is added on an same item non empty slot either left click or only 1 more item till max stack
+            var event = clickData.event();
+            var index = clickData.index();
+            var item = event.getCursor();
+            if (item == null) {
+                return;
+            }
+
+            if (index >= entries.size()) {
+                onItemInsert.accept(item.clone(), entries.size());
+                item.setAmount(item.getAmount() - 1);
+                updatePage();
+                return;
+            }
+
+
+            ItemStack itemStack = entries.get(index).getItemStack();
+            if (itemStack == null) {
+                return;
+            }
+            itemStack.setAmount(itemStack.getAmount() + 1);
+            event.getCursor().setAmount(event.getCursor().getAmount() - 1);
+        });
+
+        clickActions.put(InventoryAction.PLACE_SOME, clickData -> {
+            //todo do the math on how many can be added to it
+            //When items of the same type in the cursor and slot are being added (anything from 2 to 63 items) only 1 and all and non is treated different
+            var event = clickData.event();
+            var index = clickData.index();
+            System.out.println("Attempt to add item");
+            var item = event.getCursor();
+            if (item == null) {
+                return;
+            }
+
+            int stackSize = item.getMaxStackSize();
+
+            ItemStack itemStack = entries.get(index).getItemStack();
+            if (itemStack == null) {
+                return;
+            }
+
+            int amount = Math.min(stackSize - itemStack.getAmount(), item.getAmount());
+
+            itemStack.setAmount(itemStack.getAmount() + amount);
+            item.setAmount(item.getAmount() - amount);
+            updatePage();
+        });
+
+        clickActions.put(InventoryAction.NOTHING, clickData -> {
+            //item is full nothing happens
+            var event = clickData.event();
+            var index = clickData.index();
+            //item is full nothing happens
+            var item = event.getCursor();
+            if (item == null) {
+                return;
+            }
+
+            onItemInsert.accept(item.clone(), entries.size());
+            event.getCursor().setAmount(0);
+            updatePage();
+        });
+
+        clickActions.put(InventoryAction.PICKUP_ALL, clickData -> {
+            var object = clickData.object();
+            if (object instanceof Button button) {
+                button.onClick(clickData.event());
+            }
+        });
+
+
+    }
+
+
 }

@@ -1,7 +1,7 @@
 package com.wonkglorg.utilitylib.inventory.specialised;
 
-import com.wonkglorg.testplugin1211.inventory.Button;
-import com.wonkglorg.testplugin1211.inventory.GuiInventory;
+import com.wonkglorg.utilitylib.inventory.Button;
+import com.wonkglorg.utilitylib.inventory.GuiInventory;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;

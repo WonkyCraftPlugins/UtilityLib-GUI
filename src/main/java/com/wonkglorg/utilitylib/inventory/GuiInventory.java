@@ -1,6 +1,6 @@
 package com.wonkglorg.utilitylib.inventory;
 
-import com.wonkglorg.testplugin1211.inventory.profile.MenuProfile;
+import com.wonkglorg.utilitylib.inventory.profile.MenuProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -19,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
 /**
@@ -42,13 +43,29 @@ public abstract class GuiInventory implements Listener {
 
     protected final JavaPlugin plugin;
     private final Inventory inventory;
+    /**
+     * The slots that are open for items to be placed in and moved out of (0-indexed) this gets ignored by the pagination gui if used in the same inventory region, (this does not include {@link #returnItems} this will always return items in open slots even if they include pagination slots)
+     */
     protected final Set<Integer> openSlots = new LinkedHashSet<>();
+    /**
+     * Runs when the GUI is destroyed (should be used to clean up any resources)
+     */
     private Runnable onDestroy;
+    /**
+     * Runs when an inventory click is made in an open slot (0-indexed), list of all slots affected by the click
+     */
     private BiConsumer<InventoryClickEvent, List<Integer>> onClickOpenSlot = (e, i) -> {
     };
     private Consumer<InventoryDragEvent> onDragOpenSlot = e -> {
     };
+    /**
+     * The buttons in the GUI (0-indexed)
+     */
     private final Map<Integer, Button> buttons = new HashMap<>();
+    /**
+     * Handles all possible clicks in the GUI.
+     */
+    private final List<ClickActionData> clickHandlers = new ArrayList<>();
 
     /**
      * The pagination GUIs that are part of this GUI (if any)
@@ -73,6 +90,7 @@ public abstract class GuiInventory implements Listener {
         this.profile = profile;
         this.inventory = inventory;
         Bukkit.getPluginManager().registerEvents(this, plugin);
+        registerDefaultClicks();
     }
 
     /**
@@ -335,11 +353,11 @@ public abstract class GuiInventory implements Listener {
     /**
      * Opens slots so that items can be placed in them
      *
-     * @param start The start of the open slot section, inclusive
-     * @param end   The end of the open slot section, exclusive
+     * @param start The start of the open slot section, inclusive  (0-indexed)
+     * @param end   The end of the open slot section, inclusive  (0-indexed)
      */
     public void openSlots(int start, int end) {
-        for (int i = start; i < end; i++) {
+        for (int i = start; i <= end; i++) {
             openSlots.add(i);
         }
     }
@@ -347,14 +365,14 @@ public abstract class GuiInventory implements Listener {
     /**
      * Opens slots so that items can be placed in them
      *
-     * @param x1 The x position to open from, inclusive
-     * @param y1 The y position to open from, inclusive
-     * @param x2 The x position to open to, exclusive
-     * @param y2 The y position to open to, exclusive
+     * @param x1 The x position to open from, inclusive  (0-indexed)
+     * @param y1 The y position to open from, inclusive  (0-indexed)
+     * @param x2 The x position to open to, inclusive  (0-indexed)
+     * @param y2 The y position to open to, inclusive  (0-indexed)
      */
     public void openSlots(int x1, int y1, int x2, int y2) {
-        for (int y = y1; y < y2; y++) {
-            for (int x = x1; x < x2; x++) {
+        for (int y = y1; y <= y2; y++) {
+            for (int x = x1; x <= x2; x++) {
                 openSlots.add(y * maxRows + x);
             }
         }
@@ -372,11 +390,11 @@ public abstract class GuiInventory implements Listener {
     /**
      * Closes slots so that items can't be placed in them
      *
-     * @param start The start of the closed slot section, inclusive
-     * @param end   The end of the open closed section, exclusive
+     * @param start The start of the closed slot section, inclusive  (0-indexed)
+     * @param end   The end of the open closed section, inclusive  (0-indexed)
      */
     public void closeSlots(int start, int end) {
-        for (int i = start; i < end; i++) {
+        for (int i = start; i <= end; i++) {
             openSlots.remove(i);
         }
     }
@@ -384,14 +402,14 @@ public abstract class GuiInventory implements Listener {
     /**
      * Closes slots so that items can't be placed in them
      *
-     * @param x1 The x position to close from, inclusive
-     * @param y1 The y position to close from, inclusive
-     * @param x2 The x position to close to, exclusive
-     * @param y2 The y position to close to, exclusive
+     * @param x1 The x position to close from, inclusive  (0-indexed)
+     * @param y1 The y position to close from, inclusive  (0-indexed)
+     * @param x2 The x position to close to, inclusive  (0-indexed)
+     * @param y2 The y position to close to, inclusive  (0-indexed)
      */
     public void closeSlots(int x1, int y1, int x2, int y2) {
-        for (int y = y1; y < y2; y++) {
-            for (int x = x1; x < x2; x++) {
+        for (int y = y1; y <= y2; y++) {
+            for (int x = x1; x <= x2; x++) {
                 openSlots.remove(y * maxRows + x);
             }
         }
@@ -487,20 +505,22 @@ public abstract class GuiInventory implements Listener {
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         //TODO test if this actually unregisters the child events otherwise creates memory leak!!!!!!!!!!!!!!!!!!!!!!!!!!
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!y
-
         if (onDestroy != null) {
             onDestroy.run();
         }
         HandlerList.unregisterAll(this);
+
         if (returnItems && lastViewer != null) {
             for (int slot : openSlots) {
                 ItemStack item = inventory.getItem(slot);
-                if (item == null) {
-                    continue;
+                if (item != null) {
+                    lastViewer.getInventory().addItem(item).values()
+                            .forEach(remainingItem ->
+                                    lastViewer.getWorld().dropItem(lastViewer.getLocation(), remainingItem));
                 }
-                lastViewer.getInventory().addItem(item).values().forEach(i -> lastViewer.getWorld().dropItem(lastViewer.getLocation(), i));
             }
         }
+
         inventory.clear();
         buttons.clear();
     }
@@ -544,20 +564,6 @@ public abstract class GuiInventory implements Listener {
 
     public Inventory getInventory(InventoryView view, int rawSlot) {
         return rawSlot < view.getTopInventory().getSize() ? view.getTopInventory() : view.getBottomInventory();
-    }
-
-
-    private void handleShiftClick(InventoryClickEvent e) {
-
-        //todo handle both shiftclick into and out of menu
-    }
-
-    private void handleLeftClick(InventoryClickEvent e) {
-
-    }
-
-    public void handleRightClick(InventoryClickEvent e) {
-
     }
 
     /**
@@ -621,74 +627,15 @@ public abstract class GuiInventory implements Listener {
             }
 
 
-
             paginationGui.onInventoryEvent(e, object, position);
             return;
         }
 
-
-        if (e.getAction() == InventoryAction.COLLECT_TO_CURSOR && !e.getClickedInventory().equals(inventory)) {
-            e.setCancelled(true);
-            return;
-        }
-
-        if (!inventory.equals(e.getClickedInventory()) && e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
-            if (!openSlots.isEmpty()) {
-                Map<Integer, ItemStack> slots = new HashMap<>();
-                int amount = Objects.requireNonNull(e.getCurrentItem()).getAmount();
-                for (int slot : openSlots) {
-                    if (amount <= 0) {
-                        break;
-                    }
-                    ItemStack item = inventory.getItem(slot);
-                    if (item == null) {
-                        int diff = Math.min(amount, e.getCurrentItem().getType().getMaxStackSize());
-                        amount -= diff;
-                        ItemStack clone = e.getCurrentItem().clone();
-                        clone.setAmount(diff);
-                        slots.put(slot, clone);
-                        continue;
-                    }
-                    if (e.getCurrentItem().isSimilar(item)) {
-                        int max = item.getType().getMaxStackSize() - item.getAmount();
-                        int diff = Math.min(max, e.getCurrentItem().getAmount());
-                        amount -= diff;
-                        ItemStack clone = item.clone();
-                        clone.setAmount(clone.getAmount() + diff);
-                        slots.put(slot, clone);
-                    }
-                }
-                if (slots.isEmpty()) {
+        for (ClickActionData data : clickHandlers) {
+            if (data.isValid.test(e, this)) {
+                if (data.action.test(e, this)) {
                     return;
                 }
-                onClickOpenSlot.accept(e, new ArrayList<>(slots.keySet()));
-                if (e.isCancelled()) {
-                    return;
-                }
-                e.setCancelled(true);
-                ItemStack item = e.getCurrentItem();
-                item.setAmount(amount);
-                e.setCurrentItem(item);
-                slots.forEach(inventory::setItem);
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
-                    ((Player) e.getWhoClicked()).updateInventory();
-                });
-                return;
-            }
-            e.setCancelled(true);
-        }
-        //todo:jmd implement different swappings for this, like shift clicking, also fix the top part being delayed, it doesn't do the current action but the action before
-        if (e.getInventory().equals(e.getClickedInventory())) {
-            if (openSlots.contains(e.getSlot())) {
-                List<Integer> list = new ArrayList<>();
-                list.add(e.getSlot());
-                onClickOpenSlot.accept(e, list);
-                return;
-            }
-            e.setCancelled(true);
-            Button button = buttons.get(e.getSlot());
-            if (button != null) {
-                button.onClick(e);
             }
         }
     }
@@ -713,5 +660,111 @@ public abstract class GuiInventory implements Listener {
 
     public JavaPlugin getPlugin() {
         return plugin;
+    }
+
+    //---------------Default Click Handlers----------------
+
+    public void registerDefaultClicks() {
+        clickHandlers.add(onDefaultInventoryClick);
+        clickHandlers.add(onDefaultShiftClick);
+        updateClickHandlers();
+    }
+
+    /**
+     * Handles all clicks in the GUI's inventory lowest prio as its just the average
+     */
+    private final ClickActionData onDefaultInventoryClick = new ClickActionData(0,
+            (e, gui) -> gui.getInventory().equals(e.getClickedInventory()),
+            (e, gui) -> {
+                if (openSlots.contains(e.getSlot())) {
+                    List<Integer> list = new ArrayList<>();
+                    list.add(e.getSlot());
+                    onClickOpenSlot.accept(e, list);
+                    return true;
+                }
+                e.setCancelled(true);
+                Button button = buttons.get(e.getSlot());
+                if (button != null) {
+                    button.onClick(e);
+                }
+                return true;
+            });
+
+    /**
+     * Handles all shift clicks in the GUI's inventory
+     */
+    private final ClickActionData onDefaultShiftClick = new ClickActionData(1,
+            (e, gui) -> !gui.equals(e.getClickedInventory()) && e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY,
+            (e, gui) -> {
+                if (!openSlots.isEmpty()) {
+                    Inventory inventory = gui.getInventory();
+                    Map<Integer, ItemStack> slots = new HashMap<>();
+                    int amount = Objects.requireNonNull(e.getCurrentItem()).getAmount();
+                    for (int slot : openSlots) {
+                        if (amount <= 0) {
+                            break;
+                        }
+                        ItemStack item = inventory.getItem(slot);
+                        if (item == null) {
+                            int diff = Math.min(amount, e.getCurrentItem().getType().getMaxStackSize());
+                            amount -= diff;
+                            ItemStack clone = e.getCurrentItem().clone();
+                            clone.setAmount(diff);
+                            slots.put(slot, clone);
+                            continue;
+                        }
+                        if (e.getCurrentItem().isSimilar(item)) {
+                            int max = item.getType().getMaxStackSize() - item.getAmount();
+                            int diff = Math.min(max, e.getCurrentItem().getAmount());
+                            amount -= diff;
+                            ItemStack clone = item.clone();
+                            clone.setAmount(clone.getAmount() + diff);
+                            slots.put(slot, clone);
+                        }
+                    }
+                    if (slots.isEmpty()) {
+                        return true;
+                    }
+                    onClickOpenSlot.accept(e, new ArrayList<>(slots.keySet()));
+                    if (e.isCancelled()) {
+                        return true;
+                    }
+                    e.setCancelled(true);
+                    ItemStack item = e.getCurrentItem();
+                    item.setAmount(amount);
+                    e.setCurrentItem(item);
+                    slots.forEach(inventory::setItem);
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(gui.getPlugin(), () -> {
+                        ((Player) e.getWhoClicked()).updateInventory();
+                    });
+                    return true;
+                }
+                e.setCancelled(true);
+                return true;
+            });
+
+
+    /**
+     * Registers a click handler for a specific action
+     *
+     * @param weight  The weight of the handler (Higher weights are called first)
+     * @param isValid The predicate that determines if the action is valid
+     * @param action  The action to run if the action is valid (Return true to cancel any further click actions from trying to run after, false to let them run)
+     */
+    public record ClickActionData(int weight, BiPredicate<InventoryClickEvent, GuiInventory> isValid,
+                                  BiPredicate<InventoryClickEvent, GuiInventory> action) {
+    }
+
+    public void addAction(ClickActionData data) {
+        clickHandlers.add(data);
+        updateClickHandlers();
+    }
+
+    public List<ClickActionData> getClickHandlers() {
+        return clickHandlers;
+    }
+
+    public void updateClickHandlers() {
+        clickHandlers.sort(Comparator.comparingInt(ClickActionData::weight));
     }
 }
