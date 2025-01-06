@@ -77,7 +77,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	private Consumer<InventoryClickEvent> onPlayerInventoryClick = e -> {
 	};
 	
-	
 	/**
 	 * The buttons in the GUI (0-indexed)
 	 */
@@ -93,6 +92,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	private final Set<PaginationGui> paginationGuis = new HashSet<>();
 	
 	protected MenuProfile profile;
+	protected Player player;
 	private final int maxRows = 9;
 	private final int maxColumns = 6;
 	
@@ -109,6 +109,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		this.plugin = plugin;
 		this.profile = profile;
 		this.inventory = inventory;
+		this.player = profile.getOwner();
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 		registerDefaultClicks();
 	}
@@ -516,6 +517,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	
 	/**
 	 * Sets the handler for when a slot in the player inventory is clicked (default behaviour is to cancel the event)
+	 *
 	 * @param onPlayerInventoryClick The handler for when a slot in the player inventory is clicked
 	 */
 	public void setOnPlayerInventoryClick(Consumer<InventoryClickEvent> onPlayerInventoryClick) {
