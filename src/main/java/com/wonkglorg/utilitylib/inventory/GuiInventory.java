@@ -628,7 +628,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		if(!inventory.equals(e.getView().getTopInventory())){
 			return;
 		}
-		System.out.println("Click Action: " + e.getAction());
 		
 		//if its a pagination button let the pagination gui handle it
 		PaginationGui paginationGui = getHandlingPaginationGui(e);
@@ -641,7 +640,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 			
 			Button potentialButton = buttons.get(e.getRawSlot());
 			Object object = potentialButton != null ? potentialButton : getInventory().getItem(e.getRawSlot());
-			System.out.println("Object: " + object);
 			
 			int position = -1;
 			
