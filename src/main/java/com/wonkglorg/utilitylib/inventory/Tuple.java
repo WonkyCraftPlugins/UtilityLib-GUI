@@ -84,10 +84,9 @@ public class Tuple<K, V> implements Serializable, Cloneable {
 	 * Creates a copy of this object (in case values are mutable use
 	 * {@link #deepCopy(Function, Function)} instead
 	 *
-	 * @throws CloneNotSupportedException
-	 */
+     */
 	@Override
-	protected Object clone() throws CloneNotSupportedException {
+	protected Object clone() {
 		return new Tuple<>(val1, val2);
 	}
 
