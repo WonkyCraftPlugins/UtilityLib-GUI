@@ -2,7 +2,6 @@ package com.wonkglorg.utilitylib.inventory;
 
 import com.wonkglorg.utilitylib.inventory.profile.MenuProfile;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -253,7 +252,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param item The item to set
 	 */
 	public void fill(ItemStack item) {
-		for(int i = 0; i < inventory.getSize(); i++){
+		for(int i = 0; i < inventory.getSize() - 1; i++){
 			inventory.setItem(i, item.clone());
 		}
 	}
@@ -262,11 +261,11 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * Fill a section of the inventory with the given item
 	 *
 	 * @param start The starting index to fill from, inclusive
-	 * @param end The ending index to fill to, exclusive
+	 * @param end The ending index to fill to, inclusive
 	 * @param item The item to set in these slots
 	 */
 	public void fill(int start, int end, ItemStack item) {
-		for(int i = start; i < end; i++){
+		for(int i = start; i <= end; i++){
 			inventory.setItem(i, item == null ? null : item.clone());
 		}
 	}
@@ -276,13 +275,13 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 *
 	 * @param x1 The X position to fill from, inclusive
 	 * @param y1 The Y position to fill from, inclusive
-	 * @param x2 The X position to fill to, exclusive
-	 * @param y2 The Y position to fill to, exclusive
+	 * @param x2 The X position to fill to, inclusive
+	 * @param y2 The Y position to fill to, inclusive
 	 * @param item The item to set in these slots
 	 */
 	public void fill(int x1, int y1, int x2, int y2, ItemStack item) {
-		for(int x = x1; x < x2; x++){
-			for(int y = y1; y < y2; y++){
+		for(int x = x1; x <= x2; x++){
+			for(int y = y1; y <= y2; y++){
 				inventory.setItem(x + (y * 9), item == null ? null : item.clone());
 			}
 		}
