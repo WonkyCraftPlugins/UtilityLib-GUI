@@ -93,7 +93,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 */
 	private final Set<PaginationGui> paginationGuis = new HashSet<>();
 	
-	protected MenuProfile profile;
+	protected T profile;
 	protected Player player;
 	private final int maxRows = 9;
 	private final int maxColumns = 6;
@@ -106,7 +106,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 *
 	 * @param inventory The inventory to create a GUI from
 	 */
-	public GuiInventory(Inventory inventory, JavaPlugin plugin, MenuProfile profile) {
+	public GuiInventory(Inventory inventory, JavaPlugin plugin, T profile) {
 		//Add profile to constructor, avoids nullpointer exception if profile is used in constructor
 		this.plugin = plugin;
 		this.profile = profile;
@@ -122,7 +122,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param size The size of the inventory
 	 * @param name The name of the inventory
 	 */
-	public GuiInventory(int size, Component name, JavaPlugin plugin, MenuProfile profile) {
+	public GuiInventory(int size, Component name, JavaPlugin plugin, T profile) {
 		this(Bukkit.createInventory(null, size, name), plugin, profile);
 	}
 	
@@ -132,7 +132,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param inventorySize The size of the inventory
 	 * @param name The name of the inventory
 	 */
-	public GuiInventory(InventorySize inventorySize, Component name, JavaPlugin plugin, MenuProfile profile) {
+	public GuiInventory(InventorySize inventorySize, Component name, JavaPlugin plugin, T profile) {
 		this(Bukkit.createInventory(null, inventorySize.getSize(), name), plugin, profile);
 	}
 	
@@ -142,7 +142,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param inventory The inventory to create a GUI from
 	 */
 	public GuiInventory(Inventory inventory, JavaPlugin plugin, Player player) {
-		this(inventory, plugin, new MenuProfile(player));
+		this(inventory, plugin, (T) new MenuProfile(player));
 		
 	}
 	
