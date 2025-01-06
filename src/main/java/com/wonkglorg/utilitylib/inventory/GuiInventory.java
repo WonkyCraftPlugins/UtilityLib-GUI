@@ -2,6 +2,7 @@ package com.wonkglorg.utilitylib.inventory;
 
 import com.wonkglorg.utilitylib.inventory.profile.MenuProfile;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -46,7 +47,8 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	static {
 		FILLER = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
 		ItemMeta meta = FILLER.getItemMeta();
-		meta.setDisplayName(" ");
+		meta.setHideTooltip(true);
+		meta.displayName(Component.empty());
 		FILLER.setItemMeta(meta);
 	}
 	
