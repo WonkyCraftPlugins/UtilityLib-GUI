@@ -1,6 +1,7 @@
 package com.wonkglorg.utilitylib.inventory.specialised;
 
 import com.wonkglorg.utilitylib.inventory.GuiInventory;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -13,7 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public abstract class GuiShulker extends GuiInventory implements Listener {
 
 
-    public GuiShulker(String name, JavaPlugin plugin, Player player) {
+    public GuiShulker(Component name, JavaPlugin plugin, Player player) {
         super(Bukkit.createInventory(player, InventoryType.SHULKER_BOX, name), plugin, player);
     }
 

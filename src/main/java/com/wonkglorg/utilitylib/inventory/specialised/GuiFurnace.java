@@ -1,6 +1,7 @@
 package com.wonkglorg.utilitylib.inventory.specialised;
 
 import com.wonkglorg.utilitylib.inventory.GuiInventory;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -11,7 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 @SuppressWarnings("unused")
 public abstract class GuiFurnace extends GuiInventory {
 
-    public GuiFurnace(String name, JavaPlugin plugin, Player player) {
+    public GuiFurnace(Component name, JavaPlugin plugin, Player player) {
         super(Bukkit.createInventory(player, InventoryType.FURNACE, name), plugin, player);
     }
 

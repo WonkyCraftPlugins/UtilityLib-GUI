@@ -1,6 +1,7 @@
 package com.wonkglorg.utilitylib.inventory;
 
 import com.wonkglorg.utilitylib.inventory.profile.MenuProfile;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -99,7 +100,7 @@ public abstract class GuiInventory implements Listener {
      * @param size The size of the inventory
      * @param name The name of the inventory
      */
-    public GuiInventory(int size, String name, JavaPlugin plugin, MenuProfile profile) {
+    public GuiInventory(int size, Component name, JavaPlugin plugin, MenuProfile profile) {
         this(Bukkit.createInventory(null, size, name), plugin, profile);
     }
 
@@ -109,7 +110,7 @@ public abstract class GuiInventory implements Listener {
      * @param inventorySize The size of the inventory
      * @param name          The name of the inventory
      */
-    public GuiInventory(InventorySize inventorySize, String name, JavaPlugin plugin, MenuProfile profile) {
+    public GuiInventory(InventorySize inventorySize, Component name, JavaPlugin plugin, MenuProfile profile) {
         this(Bukkit.createInventory(null, inventorySize.getSize(), name), plugin, profile);
     }
 
@@ -130,7 +131,7 @@ public abstract class GuiInventory implements Listener {
      * @param size The size of the inventory
      * @param name The name of the inventory
      */
-    public GuiInventory(int size, String name, JavaPlugin plugin, Player player) {
+    public GuiInventory(int size, Component name, JavaPlugin plugin, Player player) {
         this(Bukkit.createInventory(null, size, name), plugin, player);
     }
 
@@ -141,7 +142,7 @@ public abstract class GuiInventory implements Listener {
      * @param inventorySize The size of the inventory
      * @param name          The name of the inventory
      */
-    public GuiInventory(InventorySize inventorySize, String name, JavaPlugin plugin, Player player) {
+    public GuiInventory(InventorySize inventorySize, Component name, JavaPlugin plugin, Player player) {
         this(Bukkit.createInventory(null, inventorySize.getSize(), name), plugin, player);
     }
 

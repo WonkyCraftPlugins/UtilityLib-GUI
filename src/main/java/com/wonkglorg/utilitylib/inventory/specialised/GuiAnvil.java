@@ -2,6 +2,7 @@ package com.wonkglorg.utilitylib.inventory.specialised;
 
 import com.wonkglorg.utilitylib.inventory.Button;
 import com.wonkglorg.utilitylib.inventory.GuiInventory;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -14,7 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public abstract class GuiAnvil extends GuiInventory implements Listener {
 
 
-    public GuiAnvil(String name, JavaPlugin plugin, Player player) {
+    public GuiAnvil(Component name, JavaPlugin plugin, Player player) {
         super(Bukkit.createInventory(player, InventoryType.ANVIL, name), plugin, player);
     }
 
