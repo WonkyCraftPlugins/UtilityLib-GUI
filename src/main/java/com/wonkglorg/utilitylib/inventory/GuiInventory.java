@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.ref.Cleaner;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -38,6 +39,21 @@ import java.util.function.Consumer;
 public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	
 	//todo add event that runs when a new item is inserted in any open slot?
+	private static final Cleaner cleaner = Cleaner.create();
+	
+	private static class CleanupTask implements Runnable{
+		private final GuiInventory<?> gui;
+		
+		public CleanupTask(GuiInventory<?> gui) {
+			this.gui = gui;
+		}
+		
+		@Override
+		public void run() {
+			gui.destroy();
+		}
+	}
+	
 	/**
 	 * A gray stained glass pane with no name. Good for filling empty slots in GUIs.
 	 */
@@ -111,6 +127,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		this.profile = profile;
 		this.inventory = inventory;
 		this.player = profile.getOwner();
+		cleaner.register(this, new CleanupTask(this));
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 		registerDefaultClicks();
 	}
