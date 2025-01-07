@@ -548,9 +548,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param lastViewer The last Player who was viewing this GUI, to have the items returned to them.
 	 */
 	public void destroy(Player lastViewer) {
-		//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		//TODO test if this actually unregisters the child events otherwise creates memory leak!!!!!!!!!!!!!!!!!!!!!!!!!!
-		//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!y
 		if(onDestroy != null){
 			onDestroy.run();
 		}
