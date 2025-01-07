@@ -2,7 +2,6 @@ package com.wonkglorg.utilitylib.inventory;
 
 import com.wonkglorg.utilitylib.inventory.profile.MenuProfile;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -19,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.ref.Cleaner;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -39,6 +39,21 @@ import java.util.function.Consumer;
 public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	
 	//todo add event that runs when a new item is inserted in any open slot?
+	private static final Cleaner cleaner = Cleaner.create();
+	
+	private static class CleanupTask implements Runnable{
+		private final GuiInventory<?> gui;
+		
+		public CleanupTask(GuiInventory<?> gui) {
+			this.gui = gui;
+		}
+		
+		@Override
+		public void run() {
+			gui.destroy();
+		}
+	}
+	
 	/**
 	 * A gray stained glass pane with no name. Good for filling empty slots in GUIs.
 	 */
@@ -93,7 +108,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 */
 	private final Set<PaginationGui> paginationGuis = new HashSet<>();
 	
-	protected MenuProfile profile;
+	protected T profile;
 	protected Player player;
 	private final int maxRows = 9;
 	private final int maxColumns = 6;
@@ -106,12 +121,13 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 *
 	 * @param inventory The inventory to create a GUI from
 	 */
-	public GuiInventory(Inventory inventory, JavaPlugin plugin, MenuProfile profile) {
+	public GuiInventory(Inventory inventory, JavaPlugin plugin, T profile) {
 		//Add profile to constructor, avoids nullpointer exception if profile is used in constructor
 		this.plugin = plugin;
 		this.profile = profile;
 		this.inventory = inventory;
 		this.player = profile.getOwner();
+		cleaner.register(this, new CleanupTask(this));
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 		registerDefaultClicks();
 	}
@@ -122,7 +138,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param size The size of the inventory
 	 * @param name The name of the inventory
 	 */
-	public GuiInventory(int size, Component name, JavaPlugin plugin, MenuProfile profile) {
+	public GuiInventory(int size, Component name, JavaPlugin plugin, T profile) {
 		this(Bukkit.createInventory(null, size, name), plugin, profile);
 	}
 	
@@ -132,7 +148,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param inventorySize The size of the inventory
 	 * @param name The name of the inventory
 	 */
-	public GuiInventory(InventorySize inventorySize, Component name, JavaPlugin plugin, MenuProfile profile) {
+	public GuiInventory(InventorySize inventorySize, Component name, JavaPlugin plugin, T profile) {
 		this(Bukkit.createInventory(null, inventorySize.getSize(), name), plugin, profile);
 	}
 	
@@ -142,7 +158,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param inventory The inventory to create a GUI from
 	 */
 	public GuiInventory(Inventory inventory, JavaPlugin plugin, Player player) {
-		this(inventory, plugin, new MenuProfile(player));
+		this(inventory, plugin, (T) new MenuProfile(player));
 		
 	}
 	
@@ -253,7 +269,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param item The item to set
 	 */
 	public void fill(ItemStack item) {
-		for(int i = 0; i < inventory.getSize(); i++){
+		for(int i = 0; i < inventory.getSize() - 1; i++){
 			inventory.setItem(i, item.clone());
 		}
 	}
@@ -262,11 +278,11 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * Fill a section of the inventory with the given item
 	 *
 	 * @param start The starting index to fill from, inclusive
-	 * @param end The ending index to fill to, exclusive
+	 * @param end The ending index to fill to, inclusive
 	 * @param item The item to set in these slots
 	 */
 	public void fill(int start, int end, ItemStack item) {
-		for(int i = start; i < end; i++){
+		for(int i = start; i <= end; i++){
 			inventory.setItem(i, item == null ? null : item.clone());
 		}
 	}
@@ -276,13 +292,13 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 *
 	 * @param x1 The X position to fill from, inclusive
 	 * @param y1 The Y position to fill from, inclusive
-	 * @param x2 The X position to fill to, exclusive
-	 * @param y2 The Y position to fill to, exclusive
+	 * @param x2 The X position to fill to, inclusive
+	 * @param y2 The Y position to fill to, inclusive
 	 * @param item The item to set in these slots
 	 */
 	public void fill(int x1, int y1, int x2, int y2, ItemStack item) {
-		for(int x = x1; x < x2; x++){
-			for(int y = y1; y < y2; y++){
+		for(int x = x1; x <= x2; x++){
+			for(int y = y1; y <= y2; y++){
 				inventory.setItem(x + (y * 9), item == null ? null : item.clone());
 			}
 		}
@@ -532,9 +548,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param lastViewer The last Player who was viewing this GUI, to have the items returned to them.
 	 */
 	public void destroy(Player lastViewer) {
-		//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		//TODO test if this actually unregisters the child events otherwise creates memory leak!!!!!!!!!!!!!!!!!!!!!!!!!!
-		//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!y
 		if(onDestroy != null){
 			onDestroy.run();
 		}
@@ -629,7 +642,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		if(!inventory.equals(e.getView().getTopInventory())){
 			return;
 		}
-		System.out.println("Click Action: " + e.getAction());
 		
 		//if its a pagination button let the pagination gui handle it
 		PaginationGui paginationGui = getHandlingPaginationGui(e);
@@ -642,7 +654,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 			
 			Button potentialButton = buttons.get(e.getRawSlot());
 			Object object = potentialButton != null ? potentialButton : getInventory().getItem(e.getRawSlot());
-			System.out.println("Object: " + object);
 			
 			int position = -1;
 			
