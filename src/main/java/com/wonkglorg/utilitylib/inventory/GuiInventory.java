@@ -826,4 +826,18 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		filler.setItemMeta(meta);
 		return filler;
 	}
+	
+	/**
+	 * @return The Owning players inventory profile
+	 */
+	public T getProfile() {
+		return profile;
+	}
+	
+	/**
+	 * @return The Owning player
+	 */
+	public Player getPlayer() {
+		return player;
+	}
 }
