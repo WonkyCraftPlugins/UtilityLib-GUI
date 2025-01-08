@@ -274,7 +274,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param item The item to set
 	 */
 	public void fill(ItemStack item) {
-		for(int i = 0; i < inventory.getSize() - 1; i++){
+		for(int i = 0; i < inventory.getSize(); i++){
 			inventory.setItem(i, item.clone());
 		}
 	}
