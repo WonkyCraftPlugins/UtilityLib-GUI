@@ -109,7 +109,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 */
 	private final List<ClickActionData> clickHandlers = new ArrayList<>();
 	
-	private final List<ClickType> disabledClickEvents = new ArrayList<>();
+	private final Set<ClickType> disabledClickEvents = new HashSet<>();
 	
 	/**
 	 * The pagination GUIs that are part of this GUI (if any)
@@ -648,8 +648,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		if(!inventory.equals(e.getView().getTopInventory())){
 			return;
 		}
-		
-		
+
 		if(disabledClickEvents.contains(e.getClick())){
 			e.setCancelled(true);
 			return;
@@ -802,7 +801,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 *
 	 * @param weight The weight of the handler (Higher weights are called first)
 	 * @param isValid The predicate that determines if the action is valid
-	 * @param action The action to run if the action is valid (Return true to cancel any further click actions from trying to run after, false to let them run)
+	 * @param action The action to run if the action is valid (Return true to consume the event and prevent any further click actions from trying to run after, false to let them run)
 	 */
 	public record ClickActionData(int weight, BiPredicate<InventoryClickEvent, GuiInventory> isValid,
 								  BiPredicate<InventoryClickEvent, GuiInventory> action){}
@@ -836,18 +835,24 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	
 	/**
 	 * Disables a click event in the GUI
+	 *
 	 * @param clickType the type of click to disable (for example double clicks to prevent a third click from happening as spigot fires 2 single clicks and a double click event for a double click)
 	 */
-	public void disableClickEvent(ClickType clickType) {
-		disabledClickEvents.add(clickType);
+	public void disableClickEvent(ClickType... clickType) {
+		for(ClickType type : clickType){
+			disabledClickEvents.add(type);
+		}
 	}
 	
 	/**
 	 * Enables a click event in the GUI (by default all click events are enabled)
+	 *
 	 * @param clickType the type of click to enable
 	 */
-	public void enableClickEvent(ClickType clickType) {
-		disabledClickEvents.remove(clickType);
+	public void enableClickEvent(ClickType... clickType) {
+		for(ClickType type : clickType){
+			disabledClickEvents.remove(type);
+		}
 	}
 	
 	/**
