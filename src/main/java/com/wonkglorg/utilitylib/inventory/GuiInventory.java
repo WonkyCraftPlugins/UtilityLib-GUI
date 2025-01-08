@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -107,6 +108,8 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * Handles all possible clicks in the GUI.
 	 */
 	private final List<ClickActionData> clickHandlers = new ArrayList<>();
+	
+	private final List<ClickType> disabledClickEvents = new ArrayList<>();
 	
 	/**
 	 * The pagination GUIs that are part of this GUI (if any)
@@ -274,9 +277,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param item The item to set
 	 */
 	public void fill(ItemStack item) {
-		for(int i = 0; i < inventory.getSize(); i++){
-			inventory.setItem(i, item.clone());
-		}
+		fill(0, inventory.getSize() - 1, item);
 	}
 	
 	/**
@@ -648,6 +649,12 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 			return;
 		}
 		
+		
+		if(disabledClickEvents.contains(e.getClick())){
+			e.setCancelled(true);
+			return;
+		}
+		
 		//if its a pagination button let the pagination gui handle it
 		PaginationGui paginationGui = getHandlingPaginationGui(e);
 		if(paginationGui != null){
@@ -825,6 +832,22 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		meta.setHideTooltip(true);
 		filler.setItemMeta(meta);
 		return filler;
+	}
+	
+	/**
+	 * Disables a click event in the GUI
+	 * @param clickType the type of click to disable (for example double clicks to prevent a third click from happening as spigot fires 2 single clicks and a double click event for a double click)
+	 */
+	public void disableClickEvent(ClickType clickType) {
+		disabledClickEvents.add(clickType);
+	}
+	
+	/**
+	 * Enables a click event in the GUI (by default all click events are enabled)
+	 * @param clickType the type of click to enable
+	 */
+	public void enableClickEvent(ClickType clickType) {
+		disabledClickEvents.remove(clickType);
 	}
 	
 	/**
