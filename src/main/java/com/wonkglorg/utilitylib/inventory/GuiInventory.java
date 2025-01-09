@@ -281,6 +281,14 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	}
 	
 	/**
+	 * Fill a section of the inventory with the given button
+	 * @param button  The button to set in these slots
+	 */
+	public void fill(Button button) {
+		fill(0, inventory.getSize() - 1, button);
+	}
+	
+	/**
 	 * Fill a section of the inventory with the given item
 	 *
 	 * @param start The starting index to fill from, inclusive
@@ -290,6 +298,19 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	public void fill(int start, int end, ItemStack item) {
 		for(int i = start; i <= end; i++){
 			inventory.setItem(i, item == null ? null : item.clone());
+		}
+	}
+	
+	/**
+	 * Fill a section of the inventory with the given button
+	 *
+	 * @param start The starting index to fill from, inclusive
+	 * @param end The ending index to fill to, inclusive
+	 * @param button The button to set in these slots
+	 */
+	public void fill(int start, int end, Button button) {
+		for(int i = start; i <= end; i++){
+			addButton(button, i);
 		}
 	}
 	
@@ -309,12 +330,24 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 			}
 		}
 	}
-	/*
-	public Button convertStringToButton(String string) {
-
-	}
-
+	
+	/**
+	 * Fill a section of the inventory with the given button
+	 *
+	 * @param x1 The X position to fill from, inclusive
+	 * @param y1 The Y position to fill from, inclusive
+	 * @param x2 The X position to fill to, inclusive
+	 * @param y2 The Y position to fill to, inclusive
+	 * @param button The button to set in these slots
 	 */
+	public void fill(int x1, int y1, int x2, int y2, Button button) {
+		for(int x = x1; x <= x2; x++){
+			for(int y = y1; y <= y2; y++){
+				addButton(button, x, y);
+			}
+		}
+	}
+	
 	
 	/**
 	 * Remove a button from the inventory
