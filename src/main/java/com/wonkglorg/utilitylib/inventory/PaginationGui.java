@@ -421,9 +421,11 @@ public final class PaginationGui{
 		Iterator<Integer> iter = slots.iterator();
 		for(int i = start; i < end; i++){
 			PaginationEntry paginationEntry = entries.get(i);
-			if(paginationEntry.object() == null){
-				//skip to keep fillers in place
+			if(paginationEntry == null){
 				continue;
+			}
+			if(paginationEntry.object() == null){
+				gui.addItem(null, i);
 			}
 			paginationEntry.adder().accept(iter.next());
 		}
