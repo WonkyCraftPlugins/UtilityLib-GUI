@@ -223,8 +223,11 @@ public final class PaginationGui{
 	 */
 	public void addAtPosition(int index, ItemStack item) {
 		PaginationEntry paginationEntry = entries.get(index);
+		if(paginationEntry == null){
+			entries.add(index, new PaginationEntry(item, i -> gui.getInventory().setItem(i, item), false));
+			return;
+		}
 		entries.add(index, new PaginationEntry(item, i -> gui.getInventory().setItem(i, item), paginationEntry.isOpen()));
-		updatePage();
 	}
 	
 	/**
@@ -235,8 +238,13 @@ public final class PaginationGui{
 	 */
 	public void addAtPosition(int index, Button button) {
 		PaginationEntry paginationEntry = entries.get(index);
+		
+		if(paginationEntry == null){
+			entries.add(index, new PaginationEntry(button, i -> gui.addButton(button, i), false));
+			return;
+		}
+		
 		entries.add(index, new PaginationEntry(button, i -> gui.addButton(button, i), paginationEntry.isOpen()));
-		updatePage();
 	}
 	
 	/**
@@ -247,6 +255,12 @@ public final class PaginationGui{
 	 */
 	public void updateItem(int index, ItemStack item) {
 		PaginationEntry paginationEntry = entries.get(index);
+		
+		if(paginationEntry == null){
+			entries.add(index, new PaginationEntry(item, i -> gui.getInventory().setItem(i, item), false));
+			return;
+		}
+		
 		entries.set(index, new PaginationEntry(item, i -> gui.getInventory().setItem(i, item), paginationEntry.isOpen()));
 		updatePage();
 	}
@@ -259,6 +273,11 @@ public final class PaginationGui{
 	 */
 	public void updateButton(int index, Button button) {
 		PaginationEntry paginationEntry = entries.get(index);
+		
+		if(paginationEntry == null){
+			entries.add(index, new PaginationEntry(button, i -> gui.addButton(button, i), false));
+			return;
+		}
 		entries.set(index, new PaginationEntry(button, i -> gui.addButton(button, i), paginationEntry.isOpen()));
 		updatePage();
 	}

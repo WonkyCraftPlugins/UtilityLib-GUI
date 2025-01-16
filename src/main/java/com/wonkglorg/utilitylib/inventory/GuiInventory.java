@@ -282,7 +282,8 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	
 	/**
 	 * Fill a section of the inventory with the given button
-	 * @param button  The button to set in these slots
+	 *
+	 * @param button The button to set in these slots
 	 */
 	public void fill(Button button) {
 		fill(0, inventory.getSize() - 1, button);
@@ -347,7 +348,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 			}
 		}
 	}
-	
 	
 	/**
 	 * Remove a button from the inventory
@@ -681,7 +681,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		if(!inventory.equals(e.getView().getTopInventory())){
 			return;
 		}
-
+		
 		if(disabledClickEvents.contains(e.getClick())){
 			e.setCancelled(true);
 			return;
@@ -901,4 +901,12 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	public Player getPlayer() {
 		return player;
 	}
+	
+	/**
+	 * Clears all pagination GUIs assigned to this GUI
+	 */
+	public void clearPaginationGuis() {
+		paginationGuis.clear();
+	}
+	
 }
