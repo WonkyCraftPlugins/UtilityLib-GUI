@@ -696,6 +696,9 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 				return;
 			}
 			
+			
+			
+			//the button that was clicked (this works as the pagination gui registers the buttons in this menu so it can get the button from the slot directly)
 			Button potentialButton = buttons.get(e.getRawSlot());
 			Object object = potentialButton != null ? potentialButton : getInventory().getItem(e.getRawSlot());
 			

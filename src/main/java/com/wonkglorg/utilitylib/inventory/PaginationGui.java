@@ -72,8 +72,6 @@ public final class PaginationGui{
 	
 	//todo implement open slots to take from? would be pretty hard if the gui inventory handles it and not the pagination
 	
-	private boolean allowInsertion = false;
-	
 	/**
 	 * Constructs a PaginationPanel to work on a given InventoryGUI
 	 *
@@ -422,6 +420,7 @@ public final class PaginationGui{
 		for(int i = start; i < end; i++){
 			PaginationEntry paginationEntry = entries.get(i);
 			if(paginationEntry == null){
+				gui.addItem(fillerItem, i);
 				continue;
 			}
 			if(paginationEntry.object() == null){
@@ -575,122 +574,31 @@ public final class PaginationGui{
 	 */
 	public void onInventoryEvent(InventoryClickEvent event, Object object, int index) {
 		
+		//todo:jmd add way to open slots? and allow insertions
+		
 		if(index < entries.size()){
 			PaginationEntry entry = entries.get(index);
+			if(entry == null){
+				event.setCancelled(true);
+				return;
+			}
 			if(!entry.isOpen()){
 				event.setCancelled(true);
 			}
 		}
 		
-		//todo handle each seperate
-		//todo make more customizeable with what buttons do what and what action runs?
-		
-		if(!allowInsertion){
+		if(object instanceof Button button){
+			button.onClick(event);
 			return;
 		}
-		switch(event.getAction()) {
-			//needs those cases in case where the items being added are not the same as the ones in the panel
-			case SWAP_WITH_CURSOR -> {
-				//when a new stack not yet in the clicked slot is added
-				System.out.println("Attempt to add item");
-				var item = event.getCursor();
-				if(item == null){
-					return;
-				}
-				
-				System.out.println("Adding item");
-				onItemInsert.accept(item.clone(), entries.size());
-				event.getCursor().setAmount(0);
-				updatePage();
-			}
-			case PLACE_ALL -> {
-				//when a new stack not yet in the clicked slot is added on an empty slot
-				System.out.println("Attempt to add item");
-				var item = event.getCursor();
-				if(item == null){
-					return;
-				}
-				
-				if(index >= entries.size()){
-					onItemInsert.accept(item.clone(), entries.size());
-					item.setAmount(0);
-					updatePage();
-					return;
-				}
-				
-				ItemStack itemStack = entries.get(index).getItemStack();
-				if(itemStack == null){
-					return;
-				}
-				
-				itemStack.setAmount(itemStack.getAmount() + item.getAmount());
-				event.getCursor().setAmount(0);
-				updatePage();
-			}
-			case PLACE_ONE -> {
-				//when a new stack not yet in the clicked slot is added on an same item non empty slot either left click or only 1 more item till max stack
-				var item = event.getCursor();
-				if(item == null){
-					return;
-				}
-				
-				if(index >= entries.size()){
-					onItemInsert.accept(item.clone(), entries.size());
-					item.setAmount(item.getAmount() - 1);
-					updatePage();
-					return;
-				}
-				
-				ItemStack itemStack = entries.get(index).getItemStack();
-				if(itemStack == null){
-					return;
-				}
-				itemStack.setAmount(itemStack.getAmount() + 1);
-				event.getCursor().setAmount(event.getCursor().getAmount() - 1);
-				updatePage();
-			}
-			
-			case PLACE_SOME -> {
-				//todo do the math on how many can be added to it
-				//When items of the same type in the cursor and slot are being added (anything from 2 to 63 items) only 1 and all and non is treated different
-				System.out.println("Attempt to add item");
-				var item = event.getCursor();
-				if(item == null){
-					return;
-				}
-				
-				int stackSize = item.getMaxStackSize();
-				
-				ItemStack itemStack = entries.get(index).getItemStack();
-				if(itemStack == null){
-					return;
-				}
-				
-				int amount = Math.min(stackSize - itemStack.getAmount(), item.getAmount());
-				
-				itemStack.setAmount(itemStack.getAmount() + amount);
-				item.setAmount(item.getAmount() - amount);
-				updatePage();
-			}
-			
-			case NOTHING -> {
-				//item is full nothing happens
-				var item = event.getCursor();
-				if(item == null){
-					return;
-				}
-				
-				onItemInsert.accept(item.clone(), entries.size());
-				event.getCursor().setAmount(0);
-				updatePage();
-			}
-			
-			case PICKUP_ALL -> {
-				if(object instanceof Button button){
-					button.onClick(event);
-				}
+		
+		for(var action : clickActions.entrySet()){
+			if(event.getAction() == action.getKey()){
+				action.getValue().accept(new ClickData(event, this, object, index));
+				return;
 			}
 		}
+		
 		updatePage();
 	}
 	
@@ -774,13 +682,6 @@ public final class PaginationGui{
 	}
 	
 	/**
-	 * @param allowInsertion whether to allow items to be inserted into the panel
-	 */
-	public void setAllowInsertion(boolean allowInsertion) {
-		this.allowInsertion = allowInsertion;
-	}
-	
-	/**
 	 * Represents an entry in the pagination panel
 	 *
 	 * @param object the object reference (Button or ItemStack)
@@ -830,9 +731,6 @@ public final class PaginationGui{
 			var event = clickData.event();
 			System.out.println("Attempt to add item");
 			var item = event.getCursor();
-			if(item == null){
-				return;
-			}
 			
 			System.out.println("Adding item");
 			onItemInsert.accept(item.clone(), entries.size());
