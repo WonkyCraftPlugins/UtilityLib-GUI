@@ -33,6 +33,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
+
 /**
  * @author Redempt, Wonkglorg
  */
@@ -216,6 +217,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		return Math.min(Math.max(slot, 0), inventory.getSize());
 	}
 	
+	
 	/**
 	 * Add a button to the GUI in the given slot
 	 *
@@ -255,7 +257,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param button The button to be added
 	 * @param slot The slot to add the button to
 	 */
-	public void addButton(int slot, Button button) {
+	public void addButton(int slot,Button button) {
 		addButton(button, slot);
 	}
 	
@@ -696,13 +698,13 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 				return;
 			}
 			
-			
-			
 			//the button that was clicked (this works as the pagination gui registers the buttons in this menu so it can get the button from the slot directly)
 			Button potentialButton = buttons.get(e.getRawSlot());
 			Object object = potentialButton != null ? potentialButton : getInventory().getItem(e.getRawSlot());
 			
 			int position = -1;
+			
+			
 			
 			if(object instanceof Button button){
 				position = paginationGui.getPosition(button);

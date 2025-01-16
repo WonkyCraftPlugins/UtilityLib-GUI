@@ -64,11 +64,15 @@ public final class PaginationGui{
 	private Button nextButton;
 	
 	/**
+	 * IMPLEMENT LATER  IF SET TO TRUE THE PANEL WILL ALLOW INSERTIONS INTO THE PANEL SLOTS (DEFAULT FALSE)
+	 */
+	private boolean open = false;
+	
+	/**
 	 * A consumer that is called when an item is inserted into the panel
 	 */
 	private BiConsumer<ItemStack, Integer> onItemInsert = (item, index) -> entries.add(index,
-			new PaginationEntry(item, i -> gui.getInventory().setItem(i, item), false));
-	private Map<InventoryAction, Consumer<ClickData>> clickActions = new HashMap<>();
+			new PaginationEntry(item, i -> gui.getInventory().setItem(i, item)));
 	
 	//todo implement open slots to take from? would be pretty hard if the gui inventory handles it and not the pagination
 	
@@ -80,7 +84,6 @@ public final class PaginationGui{
 	public PaginationGui(GuiInventory<MenuProfile> gui) {
 		this(gui, null);
 		gui.addPaginationGui(this);
-		registerActions();
 	}
 	
 	/**
@@ -103,26 +106,13 @@ public final class PaginationGui{
 		this.onUpdate = onUpdate;
 	}
 	
-	private void addPagedButton0(Button button) {
-		entries.add(new PaginationEntry(button, i -> gui.addButton(button, i), false));
-	}
-	
 	/**
 	 * Adds a paged button to the panel
 	 *
 	 * @param button The button to add
 	 */
 	public void addPagedButton(Button button) {
-		addPagedButton0(button);
-		updatePage();
-	}
-	
-	private void addPagedItem0(ItemStack item) {
-		entries.add(new PaginationEntry(item, i -> gui.getInventory().setItem(i, item), false));
-	}
-	
-	private void addPagedItem0(ItemStack item, boolean isOpen) {
-		entries.add(new PaginationEntry(item, i -> gui.getInventory().setItem(i, item), isOpen));
+		entries.add(new PaginationEntry(button, i -> gui.addButton(button, i)));
 	}
 	
 	/**
@@ -131,8 +121,7 @@ public final class PaginationGui{
 	 * @param item The item to add
 	 */
 	public void addPagedItem(ItemStack item) {
-		addPagedItem0(item);
-		updatePage();
+		entries.add(new PaginationEntry(item, i -> gui.getInventory().setItem(i, item)));
 	}
 	
 	/**
@@ -142,9 +131,8 @@ public final class PaginationGui{
 	 */
 	public void addPagedButtons(Iterable<Button> buttons) {
 		for(Button button : buttons){
-			addPagedButton0(button);
+			addPagedButton(button);
 		}
-		updatePage();
 	}
 	
 	/**
@@ -154,9 +142,8 @@ public final class PaginationGui{
 	 */
 	public void addPagedItems(Iterable<ItemStack> items) {
 		for(ItemStack item : items){
-			addPagedItem0(item);
+			addPagedItem(item);
 		}
-		updatePage();
 	}
 	
 	/**
@@ -221,12 +208,9 @@ public final class PaginationGui{
 	 */
 	public void addAtPosition(int index, ItemStack item) {
 		ensureCapacity(index + 1);
-		PaginationEntry paginationEntry = entries.get(index);
-		if(paginationEntry == null){
-			entries.add(index, new PaginationEntry(item, i -> gui.getInventory().setItem(i, item), false));
-			return;
-		}
-		entries.add(index, new PaginationEntry(item, i -> gui.getInventory().setItem(i, item), paginationEntry.isOpen()));
+		entries.add(index, new PaginationEntry(item, i -> {
+			gui.addItem(i, item);
+		}));
 	}
 	
 	/**
@@ -237,13 +221,9 @@ public final class PaginationGui{
 	 */
 	public void addAtPosition(int index, Button button) {
 		ensureCapacity(index + 1);
-		PaginationEntry paginationEntry = entries.get(index);
-		if(paginationEntry == null){
-			entries.add(index, new PaginationEntry(button, i -> gui.addButton(button, i), false));
-			return;
-		}
-		
-		entries.add(index, new PaginationEntry(button, i -> gui.addButton(button, i), paginationEntry.isOpen()));
+		entries.add(index, new PaginationEntry(button, i -> {
+			gui.addButton(button, i);
+		}));
 	}
 	
 	/**
@@ -255,48 +235,6 @@ public final class PaginationGui{
 		while(entries.size() < size){
 			entries.add(null);
 		}
-	}
-	
-	/**
-	 * Adds an item to the panel at a specific index
-	 *
-	 * @param index The index to add the item at
-	 * @param item The item to add
-	 */
-	public void updateItem(int index, ItemStack item) {
-		if(index >= entries.size()){
-			addAtPosition(index, item);
-		}
-		
-		PaginationEntry paginationEntry = entries.get(index);
-		
-		if(paginationEntry == null){
-			entries.add(index, new PaginationEntry(item, i -> gui.getInventory().setItem(i, item), false));
-			return;
-		}
-		
-		entries.set(index, new PaginationEntry(item, i -> gui.getInventory().setItem(i, item), paginationEntry.isOpen()));
-		updatePage();
-	}
-	
-	/**
-	 * Adds a button to the panel at a specific index
-	 *
-	 * @param index The index to add the button at
-	 * @param button The button to add
-	 */
-	public void updateButton(int index, Button button) {
-		if(index >= entries.size()){
-			addAtPosition(index, button);
-		}
-		PaginationEntry paginationEntry = entries.get(index);
-		
-		if(paginationEntry == null){
-			entries.add(index, new PaginationEntry(button, i -> gui.addButton(button, i), false));
-			return;
-		}
-		entries.set(index, new PaginationEntry(button, i -> gui.addButton(button, i), paginationEntry.isOpen()));
-		updatePage();
 	}
 	
 	/**
@@ -420,13 +358,15 @@ public final class PaginationGui{
 		for(int i = start; i < end; i++){
 			PaginationEntry paginationEntry = entries.get(i);
 			if(paginationEntry == null){
-				gui.addItem(fillerItem, i);
+				gui.addItem(fillerItem, i - start);
 				continue;
 			}
 			if(paginationEntry.object() == null){
-				gui.addItem(null, i);
+				gui.addItem(null, i - start);
+				continue;
 			}
-			paginationEntry.adder().accept(iter.next());
+			
+			paginationEntry.adder().accept(i - start);
 		}
 		onUpdate.run();
 	}
@@ -457,12 +397,12 @@ public final class PaginationGui{
 	 */
 	public List<ItemStack> getItems() {
 		//@formatter:off
-        return entries.stream()
-                .map(PaginationEntry::object)
-                .filter(ItemStack.class::isInstance)
-                .map(ItemStack.class::cast)
-                .collect(Collectors.toList());
-        //@formatter:on
+		return entries.stream()
+					  .map(PaginationEntry::object)
+					  .filter(ItemStack.class::isInstance)
+					  .map(ItemStack.class::cast)
+					  .collect(Collectors.toList());
+		//@formatter:on
 	}
 	
 	/**
@@ -470,12 +410,12 @@ public final class PaginationGui{
 	 */
 	public List<Button> getButtons() {
 		//@formatter:off
-        return entries.stream()
-                .map(PaginationEntry::object)
-                .filter(Button.class::isInstance)
-                .map(Button.class::cast)
-                .collect(Collectors.toList());
-        //@formatter:on
+		return entries.stream()
+					  .map(PaginationEntry::object)
+					  .filter(Button.class::isInstance)
+					  .map(Button.class::cast)
+					  .collect(Collectors.toList());
+		//@formatter:on
 	}
 	
 	/**
@@ -573,33 +513,17 @@ public final class PaginationGui{
 	 * @param index the index of the object in the entries list
 	 */
 	public void onInventoryEvent(InventoryClickEvent event, Object object, int index) {
-		
-		//todo:jmd add way to open slots? and allow insertions
-		
-		if(index < entries.size()){
-			PaginationEntry entry = entries.get(index);
-			if(entry == null){
-				event.setCancelled(true);
-				return;
-			}
-			if(!entry.isOpen()){
-				event.setCancelled(true);
-			}
-		}
-		
 		if(object instanceof Button button){
 			button.onClick(event);
+			event.setCancelled(true);
 			return;
 		}
 		
-		for(var action : clickActions.entrySet()){
-			if(event.getAction() == action.getKey()){
-				action.getValue().accept(new ClickData(event, this, object, index));
-				return;
-			}
+		if(!open){
+			event.setCancelled(true);
 		}
 		
-		updatePage();
+		//updatePage();
 	}
 	
 	/**
@@ -687,7 +611,7 @@ public final class PaginationGui{
 	 * @param object the object reference (Button or ItemStack)
 	 * @param adder the adder that sets the object in the gui
 	 */
-	private record PaginationEntry(Object object, IntConsumer adder, boolean isOpen){
+	private record PaginationEntry(Object object, IntConsumer adder){
 		/**
 		 * Returns the objects itemstack (either directly or in the form of a buttons itemstack)
 		 *
@@ -721,119 +645,4 @@ public final class PaginationGui{
 			return object instanceof ItemStack;
 		}
 	}
-	
-	public void setClickAction(InventoryAction action, Consumer<ClickData> consumer) {
-		clickActions.put(action, consumer);
-	}
-	
-	private void registerActions() {
-		clickActions.put(InventoryAction.SWAP_WITH_CURSOR, clickData -> {
-			var event = clickData.event();
-			System.out.println("Attempt to add item");
-			var item = event.getCursor();
-			
-			System.out.println("Adding item");
-			onItemInsert.accept(item.clone(), entries.size());
-			event.getCursor().setAmount(0);
-		});
-		
-		clickActions.put(InventoryAction.PLACE_ALL, clickData -> {
-			//when a new stack not yet in the clicked slot is added on an empty slot
-			var event = clickData.event();
-			var index = clickData.index();
-			System.out.println("Attempt to add item");
-			var item = event.getCursor();
-			if(item == null){
-				return;
-			}
-			
-			if(index >= entries.size()){
-				onItemInsert.accept(item.clone(), entries.size());
-				item.setAmount(0);
-				updatePage();
-				return;
-			}
-			
-			ItemStack itemStack = entries.get(index).getItemStack();
-			if(itemStack == null){
-				return;
-			}
-			
-			itemStack.setAmount(itemStack.getAmount() + item.getAmount());
-			event.getCursor().setAmount(0);
-		});
-		
-		clickActions.put(InventoryAction.PLACE_ONE, clickData -> {
-			//when a new stack not yet in the clicked slot is added on an same item non empty slot either left click or only 1 more item till max stack
-			var event = clickData.event();
-			var index = clickData.index();
-			var item = event.getCursor();
-			if(item == null){
-				return;
-			}
-			
-			if(index >= entries.size()){
-				onItemInsert.accept(item.clone(), entries.size());
-				item.setAmount(item.getAmount() - 1);
-				updatePage();
-				return;
-			}
-			
-			ItemStack itemStack = entries.get(index).getItemStack();
-			if(itemStack == null){
-				return;
-			}
-			itemStack.setAmount(itemStack.getAmount() + 1);
-			event.getCursor().setAmount(event.getCursor().getAmount() - 1);
-		});
-		
-		clickActions.put(InventoryAction.PLACE_SOME, clickData -> {
-			//todo do the math on how many can be added to it
-			//When items of the same type in the cursor and slot are being added (anything from 2 to 63 items) only 1 and all and non is treated different
-			var event = clickData.event();
-			var index = clickData.index();
-			System.out.println("Attempt to add item");
-			var item = event.getCursor();
-			if(item == null){
-				return;
-			}
-			
-			int stackSize = item.getMaxStackSize();
-			
-			ItemStack itemStack = entries.get(index).getItemStack();
-			if(itemStack == null){
-				return;
-			}
-			
-			int amount = Math.min(stackSize - itemStack.getAmount(), item.getAmount());
-			
-			itemStack.setAmount(itemStack.getAmount() + amount);
-			item.setAmount(item.getAmount() - amount);
-			updatePage();
-		});
-		
-		clickActions.put(InventoryAction.NOTHING, clickData -> {
-			//item is full nothing happens
-			var event = clickData.event();
-			var index = clickData.index();
-			//item is full nothing happens
-			var item = event.getCursor();
-			if(item == null){
-				return;
-			}
-			
-			onItemInsert.accept(item.clone(), entries.size());
-			event.getCursor().setAmount(0);
-			updatePage();
-		});
-		
-		clickActions.put(InventoryAction.PICKUP_ALL, clickData -> {
-			var object = clickData.object();
-			if(object instanceof Button button){
-				button.onClick(clickData.event());
-			}
-		});
-		
-	}
-	
 }
