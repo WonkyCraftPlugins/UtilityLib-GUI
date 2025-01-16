@@ -222,7 +222,7 @@ public final class PaginationGui{
 	 * @param item The item to add
 	 */
 	public void addAtPosition(int index, ItemStack item) {
-		entries.ensureCapacity(index);
+		entries.ensureCapacity(index+1);
 		PaginationEntry paginationEntry = entries.get(index);
 		if(paginationEntry == null){
 			entries.add(index, new PaginationEntry(item, i -> gui.getInventory().setItem(i, item), false));
@@ -238,7 +238,7 @@ public final class PaginationGui{
 	 * @param button The button to add
 	 */
 	public void addAtPosition(int index, Button button) {
-		entries.ensureCapacity(index);
+		entries.ensureCapacity(index+1);
 		PaginationEntry paginationEntry = entries.get(index);
 		if(paginationEntry == null){
 			entries.add(index, new PaginationEntry(button, i -> gui.addButton(button, i), false));
