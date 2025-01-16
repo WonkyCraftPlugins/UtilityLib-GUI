@@ -31,7 +31,7 @@ public final class PaginationGui{
 	/**
 	 * A list that represents the entries in the panel the pagination is based on this lists ordering (if this ordering is modified so will the panel elements order) (to create an empty panel slot use null or leave the {@link PaginationEntry#object} null)
 	 */
-	private final List<PaginationEntry> entries = new ArrayList<>();
+	private final ArrayList<PaginationEntry> entries = new ArrayList<>();
 	/**
 	 * All Slots this panel uses to display elements
 	 */
@@ -222,6 +222,7 @@ public final class PaginationGui{
 	 * @param item The item to add
 	 */
 	public void addAtPosition(int index, ItemStack item) {
+		entries.ensureCapacity(index);
 		PaginationEntry paginationEntry = entries.get(index);
 		if(paginationEntry == null){
 			entries.add(index, new PaginationEntry(item, i -> gui.getInventory().setItem(i, item), false));
@@ -237,8 +238,8 @@ public final class PaginationGui{
 	 * @param button The button to add
 	 */
 	public void addAtPosition(int index, Button button) {
+		entries.ensureCapacity(index);
 		PaginationEntry paginationEntry = entries.get(index);
-		
 		if(paginationEntry == null){
 			entries.add(index, new PaginationEntry(button, i -> gui.addButton(button, i), false));
 			return;
@@ -254,6 +255,10 @@ public final class PaginationGui{
 	 * @param item The item to add
 	 */
 	public void updateItem(int index, ItemStack item) {
+		if(index >= entries.size()){
+			addAtPosition(index, item);
+		}
+		
 		PaginationEntry paginationEntry = entries.get(index);
 		
 		if(paginationEntry == null){
@@ -272,6 +277,9 @@ public final class PaginationGui{
 	 * @param button The button to add
 	 */
 	public void updateButton(int index, Button button) {
+		if(index >= entries.size()){
+			addAtPosition(index, button);
+		}
 		PaginationEntry paginationEntry = entries.get(index);
 		
 		if(paginationEntry == null){
