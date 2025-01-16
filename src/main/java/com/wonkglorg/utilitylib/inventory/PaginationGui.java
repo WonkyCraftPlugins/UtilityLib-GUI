@@ -422,7 +422,8 @@ public final class PaginationGui{
 		for(int i = start; i < end; i++){
 			PaginationEntry paginationEntry = entries.get(i);
 			if(paginationEntry.object() == null){
-				gui.addItem(null, i);
+				//skip to keep fillers in place
+				continue;
 			}
 			paginationEntry.adder().accept(iter.next());
 		}
