@@ -222,7 +222,7 @@ public final class PaginationGui{
 	 * @param item The item to add
 	 */
 	public void addAtPosition(int index, ItemStack item) {
-		ensureCapacity(index+1);
+		ensureCapacity(index + 1);
 		PaginationEntry paginationEntry = entries.get(index);
 		if(paginationEntry == null){
 			entries.add(index, new PaginationEntry(item, i -> gui.getInventory().setItem(i, item), false));
@@ -238,7 +238,7 @@ public final class PaginationGui{
 	 * @param button The button to add
 	 */
 	public void addAtPosition(int index, Button button) {
-		ensureCapacity(index+1);
+		ensureCapacity(index + 1);
 		PaginationEntry paginationEntry = entries.get(index);
 		if(paginationEntry == null){
 			entries.add(index, new PaginationEntry(button, i -> gui.addButton(button, i), false));
@@ -250,6 +250,7 @@ public final class PaginationGui{
 	
 	/**
 	 * Ensures the entries list has a capacity of at least size
+	 *
 	 * @param size The size to ensure
 	 */
 	private void ensureCapacity(int size) {
@@ -481,6 +482,10 @@ public final class PaginationGui{
 	 */
 	public int getPosition(ItemStack item) {
 		for(PaginationEntry entry : entries){
+			if(entry == null){
+				continue;
+			}
+			
 			if(entry.object().equals(item)){
 				return entries.indexOf(entry);
 			}
@@ -494,6 +499,9 @@ public final class PaginationGui{
 	 */
 	public int getPosition(Button button) {
 		for(PaginationEntry entry : entries){
+			if(entry == null){
+				continue;
+			}
 			if(entry.object().equals(button)){
 				return entries.indexOf(entry);
 			}
