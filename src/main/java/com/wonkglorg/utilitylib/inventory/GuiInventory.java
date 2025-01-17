@@ -1,6 +1,7 @@
 package com.wonkglorg.utilitylib.inventory;
 
 import com.wonkglorg.utilitylib.inventory.profile.MenuProfile;
+import com.wonkglorg.utilitylib.manager.GuiManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -506,6 +507,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 */
 	public void open() {
 		addComponents();
+		GuiManager.addMenu(player, this);
 		profile.getOwner().openInventory(inventory);
 	}
 	

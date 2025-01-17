@@ -1,5 +1,6 @@
-package com.wonkglorg.utilitylib.inventory.profile;
+package com.wonkglorg.utilitylib.manager;
 
+import com.wonkglorg.utilitylib.inventory.profile.MenuProfile;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
