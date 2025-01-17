@@ -3,6 +3,7 @@ package com.wonkglorg.utilitylib.manager;
 import com.wonkglorg.utilitylib.inventory.GuiInventory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,6 +49,17 @@ public class GuiManager{
 		}
 		
 		return Optional.empty();
+	}
+	
+	/**
+	 * Gets all menus of a given type
+	 *
+	 * @param clazz The class of the menu
+	 * @param <T> The type of the menu
+	 * @return All menus of the given type
+	 */
+	public static <T extends GuiInventory> List<T> getMenus(Class<T> clazz) {
+		return (List<T>) menus.values().stream().filter(clazz::isInstance).toList();
 	}
 	
 	/**
