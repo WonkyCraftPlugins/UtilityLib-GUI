@@ -126,6 +126,11 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	private boolean destroyOnClose = true;
 	
 	/**
+	 * Whether or not the GUI has been destroyed (this menu should not be used anymore if it was marked as destroyed)
+	 */
+	private boolean isDestroyed = false;
+	
+	/**
 	 * Creates a new GUI from an inventory
 	 *
 	 * @param inventory The inventory to create a GUI from
@@ -507,7 +512,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 */
 	public void open() {
 		addComponents();
-		GuiManager.addMenu(player, this);
+		GuiManager.addMenu(player.getUniqueId(), this);
 		profile.getOwner().openInventory(inventory);
 	}
 	
@@ -589,6 +594,9 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param lastViewer The last Player who was viewing this GUI, to have the items returned to them.
 	 */
 	public void destroy(Player lastViewer) {
+		if(isDestroyed){
+			return;
+		}
 		if(onDestroy != null){
 			onDestroy.run();
 		}
@@ -607,6 +615,8 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		
 		inventory.clear();
 		buttons.clear();
+		isDestroyed = true;
+		GuiManager.cleanup(player.getUniqueId());
 	}
 	
 	/**
@@ -912,5 +922,11 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		paginationGuis.clear();
 	}
 	
+	/**
+	 * @return {@link #isDestroyed}
+	 */
+	public boolean isDestroyed() {
+		return isDestroyed;
+	}
 }
 	

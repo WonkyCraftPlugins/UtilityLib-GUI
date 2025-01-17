@@ -1,12 +1,13 @@
 package com.wonkglorg.utilitylib.manager;
 
 import com.wonkglorg.utilitylib.inventory.GuiInventory;
-import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+//todo:wonkglorg add multiple menus to assign per person?, doesn't seem useful if anyone needs that they can just keep the GuiInventory object themselves, this is strictly for open menus.
 
 /**
  * Class to manage and store all the menus created
