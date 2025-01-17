@@ -29,6 +29,26 @@ public class GuiManager{
 	}
 	
 	/**
+	 * Gets the menu of the player
+	 *
+	 * @param player The player to get the menu of
+	 * @param clazz The class of the menu (if a menu exists but is of the wrong type it will return an empty optional as well)
+	 * @return The menu of the player (null if the player doesn't have the menu)
+	 */
+	public static <T> Optional<T> getMenu(Player player, Class<T> clazz) {
+		var inventory = menus.get(player);
+		if(inventory == null){
+			return Optional.empty();
+		}
+		
+		if(clazz.isAssignableFrom(inventory.getClass())){
+			return Optional.of((T) inventory);
+		}
+		
+		return Optional.empty();
+	}
+	
+	/**
 	 * Cleans up all menus and destroys all menus for the player
 	 *
 	 * @param player The player to cleanup the menus for
