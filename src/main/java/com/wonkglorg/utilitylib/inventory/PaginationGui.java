@@ -71,8 +71,7 @@ public final class PaginationGui{
 	/**
 	 * A consumer that is called when an item is inserted into the panel
 	 */
-	private BiConsumer<ItemStack, Integer> onItemInsert = (item, index) -> entries.add(index,
-			new PaginationEntry(item, i -> gui.getInventory().setItem(i, item)));
+	private BiConsumer<ItemStack, Integer> onItemInsert = (item, index) -> entries.add(index, new PaginationEntry(item));
 	
 	//todo implement open slots to take from? would be pretty hard if the gui inventory handles it and not the pagination
 	
@@ -112,7 +111,7 @@ public final class PaginationGui{
 	 * @param button The button to add
 	 */
 	public void addPagedButton(Button button) {
-		entries.add(new PaginationEntry(button, i -> gui.addButton(button, i)));
+		entries.add(new PaginationEntry(button));
 	}
 	
 	/**
@@ -121,7 +120,7 @@ public final class PaginationGui{
 	 * @param item The item to add
 	 */
 	public void addPagedItem(ItemStack item) {
-		entries.add(new PaginationEntry(item, i -> gui.getInventory().setItem(i, item)));
+		entries.add(new PaginationEntry(item));
 	}
 	
 	/**
@@ -207,10 +206,8 @@ public final class PaginationGui{
 	 * @param item The item to add
 	 */
 	public void addAtPosition(int index, ItemStack item) {
-		ensureCapacity(index + 1);
-		entries.add(index, new PaginationEntry(item, i -> {
-			gui.addItem(i, item);
-		}));
+		ensureCapacity(index);
+		entries.set(index, new PaginationEntry(item));
 	}
 	
 	/**
@@ -220,20 +217,19 @@ public final class PaginationGui{
 	 * @param button The button to add
 	 */
 	public void addAtPosition(int index, Button button) {
-		ensureCapacity(index + 1);
-		entries.add(index, new PaginationEntry(button, i -> {
-			gui.addButton(button, i);
-		}));
+		ensureCapacity(index);
+		entries.set(index, new PaginationEntry(button));
 	}
 	
 	/**
-	 * Ensures the entries list has a capacity of at least size
+	 * Ensures the entries list has a capacity of at least index
 	 *
-	 * @param size The size to ensure
+	 * @param index The index to ensure
 	 */
-	private void ensureCapacity(int size) {
-		while(entries.size() < size){
-			entries.add(null);
+	private void ensureCapacity(int index) {
+		int start = entries.size();
+		while(start <= index){
+			entries.add(start++, null);
 		}
 	}
 	
@@ -357,16 +353,21 @@ public final class PaginationGui{
 		Iterator<Integer> iter = slots.iterator();
 		for(int i = start; i < end; i++){
 			PaginationEntry paginationEntry = entries.get(i);
+			int slot = i - start;
 			if(paginationEntry == null){
-				gui.addItem(fillerItem, i - start);
+				gui.addItem(fillerItem, slot);
 				continue;
 			}
 			if(paginationEntry.object() == null){
-				gui.addItem(null, i - start);
+				gui.addItem(null, slot);
 				continue;
 			}
 			
-			paginationEntry.adder().accept(i - start);
+			if(paginationEntry.isButton()){
+				gui.addButton((Button) paginationEntry.object(), slot);
+			} else {
+				gui.addItem(paginationEntry.getItemStack(), slot);
+			}
 		}
 		onUpdate.run();
 	}
@@ -609,9 +610,8 @@ public final class PaginationGui{
 	 * Represents an entry in the pagination panel
 	 *
 	 * @param object the object reference (Button or ItemStack)
-	 * @param adder the adder that sets the object in the gui
 	 */
-	private record PaginationEntry(Object object, IntConsumer adder){
+	private record PaginationEntry(Object object){
 		/**
 		 * Returns the objects itemstack (either directly or in the form of a buttons itemstack)
 		 *
@@ -625,6 +625,10 @@ public final class PaginationGui{
 				return button.getItem();
 			}
 			return null;
+		}
+		
+		public boolean isButton() {
+			return object instanceof Button;
 		}
 	}
 	
