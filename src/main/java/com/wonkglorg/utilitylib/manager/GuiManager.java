@@ -1,12 +1,14 @@
 package com.wonkglorg.utilitylib.manager;
 
 import com.wonkglorg.utilitylib.inventory.GuiInventory;
+import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 //todo:wonkglorg add multiple menus to assign per person?, doesn't seem useful if anyone needs that they can just keep the GuiInventory object themselves, this is strictly for open menus.
 
@@ -81,6 +83,22 @@ public class GuiManager{
 	public static void cleanup() {
 		for(var player : menus.keySet()){
 			cleanup(player);
+		}
+	}
+	
+	/**
+	 * Cleans up all menus and destroys all menus for all players, sends a message to the player when the menu is closed
+	 */
+	public static void cleanup(Consumer<Player> onInventoryClose) {
+		for(var player : menus.keySet()){
+			var inventory = menus.remove(player);
+			if(inventory == null){
+				return;
+			}
+			inventory.getPlayer().closeInventory();
+			if(onInventoryClose != null){
+				onInventoryClose.accept(inventory.getPlayer());
+			}
 		}
 	}
 	
