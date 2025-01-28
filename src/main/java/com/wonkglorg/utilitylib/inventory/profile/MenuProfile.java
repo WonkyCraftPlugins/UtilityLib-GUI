@@ -9,27 +9,19 @@ import org.bukkit.entity.Player;
 public class MenuProfile implements Cloneable {
     /**
      * The owner of the menu
-     */
+	 * -- GETTER --
+	 *  Gets owner of the menu.
+	 *
+	 * @return {@link Player} owning the menu.
+	 
+	 */
     protected Player owner;
 
     public MenuProfile(Player player) {
         this.owner = player;
     }
-
-    /**
-     * Gets owner of the menu.
-     *
-     * @return {@link Player} owning the menu.
-     */
-    public Player getOwner() {
-        return owner;
-    }
-
-    public void setOwner(Player owner) {
-        this.owner = owner;
-    }
-
-    @Override
+	
+	@Override
     public MenuProfile clone() {
         try {
             return (MenuProfile) super.clone();
@@ -37,5 +29,12 @@ public class MenuProfile implements Cloneable {
             throw new AssertionError();
         }
     }
-
+	
+	public Player getOwner() {
+		return owner;
+	}
+	
+	public void setOwner(Player owner) {
+		this.owner = owner;
+	}
 }

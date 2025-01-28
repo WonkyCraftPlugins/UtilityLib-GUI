@@ -13,7 +13,11 @@ import java.util.function.Predicate;
  */
 @SuppressWarnings("unused")
 public final class ProfileManager<T extends MenuProfile> {
-    private T defaultMenu;
+	/**
+	 *  Sets the default MenuProfile to asign to a player when non could be found for the player.
+	 *  Inherit all values passed with the class besides the owner being reasigned to the new player.
+	 */
+	private final T defaultMenu;
     private final Map<Player, T> utilityMap = new HashMap<>();
 
     /**
@@ -24,18 +28,8 @@ public final class ProfileManager<T extends MenuProfile> {
     public ProfileManager(T defaultMenu) {
         this.defaultMenu = defaultMenu;
     }
-
-    /**
-     * Sets the default MenuProfile to asign to a player when non could be found for the player.
-     * Inherit all values passed with the class besides the owner being reasigned to the new player.
-     *
-     * @param defaultMenu
-     */
-    public void setDefaultMenu(T defaultMenu) {
-        this.defaultMenu = defaultMenu;
-    }
-
-    /**
+	
+	/**
      * Gets the MenuProfile for the player, if none is found a new one is created and returned.
      * @param player the player to get the profile for
      * @return the MenuProfile for the player
@@ -47,5 +41,8 @@ public final class ProfileManager<T extends MenuProfile> {
         utilityMap.keySet().removeIf(Predicate.not(Player::isValid));
         return utilityMap.computeIfAbsent(player, k -> profile);
     }
-
+	
+	public T getDefaultMenu() {
+		return defaultMenu;
+	}
 }

@@ -37,10 +37,9 @@ import java.util.function.Consumer;
 /**
  * @author Redempt, Wonkglorg
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "unchecked"})
 public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	
-	//todo add event that runs when a new item is inserted in any open slot?
 	private static final Cleaner cleaner = Cleaner.create();
 	
 	private static class CleanupTask implements Runnable{
@@ -74,7 +73,14 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	public static final ItemStack LIGHT_GRAY_FILLER = createFiller(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
 	public static final ItemStack CYAN_STAINED_GLASS_PANE = createFiller(Material.CYAN_STAINED_GLASS_PANE);
 	
+	/**
+	 * The player who owns this GUI
+	 */
 	protected final JavaPlugin plugin;
+	
+	/**
+	 * The backing minecraft inventory
+	 */
 	private final Inventory inventory;
 	/**
 	 * The slots that are open for items to be placed in and moved out of (0-indexed) this gets ignored by the pagination gui if used in the same inventory region, (this does not include {@link #returnItems} this will always return items in open slots even if they include pagination slots)
@@ -84,6 +90,12 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * Runs when the GUI is destroyed (should be used to clean up any resources)
 	 */
 	private Runnable onDestroy;
+	
+	/**
+	 * Runs when an inventory click is made (before any other click action or button action) can be used to debug or do something specific no matter what is being clicked this does not adhere to {@link #disabledClickEvents} and simply gets called for every event inside the menu
+	 */
+	private Consumer<InventoryClickEvent> onClick = e -> {
+	};
 	/**
 	 * Runs when an inventory click is made in an open slot (0-indexed), list of all slots affected by the click
 	 */
@@ -97,6 +109,10 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	
 	/**
 	 * Runs when a player clicks in the player inventory
+	 * -- SETTER --
+	 * Sets the handler for when a slot in the player inventory is clicked (default behaviour is to cancel the event)
+	 *
+	 * @param onPlayerInventoryClick The handler for when a slot in the player inventory is clicked
 	 */
 	private Consumer<InventoryClickEvent> onPlayerInventoryClick = e -> {
 	};
@@ -117,12 +133,28 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 */
 	private final Set<PaginationGui> paginationGuis = new HashSet<>();
 	
+	/**
+	 * -- GETTER --
+	 *
+	 * @return The Owning players inventory profile
+	 */
 	protected T profile;
+	/**
+	 * -- GETTER --
+	 *
+	 * @return The Owning player
+	 */
 	protected Player player;
-	private final int maxRows = 9;
-	private final int maxColumns = 6;
+	private static final int MAX_ROWS = 9;
+	private static final int MAX_COLUMNS = 6;
 	
 	private boolean returnItems = true;
+	/**
+	 * -- SETTER --
+	 * Sets whether this GUI is destroyed when it has been closed by all viewers
+	 *
+	 * @param destroyOnClose Whether this GUI is destroyed when it has been closed by all viewers
+	 */
 	private boolean destroyOnClose = true;
 	
 	/**
@@ -135,7 +167,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 *
 	 * @param inventory The inventory to create a GUI from
 	 */
-	public GuiInventory(Inventory inventory, JavaPlugin plugin, T profile) {
+	protected GuiInventory(Inventory inventory, JavaPlugin plugin, T profile) {
 		//Add profile to constructor, avoids nullpointer exception if profile is used in constructor
 		this.plugin = plugin;
 		this.profile = profile;
@@ -152,7 +184,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param size The size of the inventory
 	 * @param name The name of the inventory
 	 */
-	public GuiInventory(int size, Component name, JavaPlugin plugin, T profile) {
+	protected GuiInventory(int size, Component name, JavaPlugin plugin, T profile) {
 		this(Bukkit.createInventory(null, size, name), plugin, profile);
 	}
 	
@@ -162,7 +194,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param inventorySize The size of the inventory
 	 * @param name The name of the inventory
 	 */
-	public GuiInventory(InventorySize inventorySize, Component name, JavaPlugin plugin, T profile) {
+	protected GuiInventory(InventorySize inventorySize, Component name, JavaPlugin plugin, T profile) {
 		this(Bukkit.createInventory(null, inventorySize.getSize(), name), plugin, profile);
 	}
 	
@@ -171,7 +203,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 *
 	 * @param inventory The inventory to create a GUI from
 	 */
-	public GuiInventory(Inventory inventory, JavaPlugin plugin, Player player) {
+	protected GuiInventory(Inventory inventory, JavaPlugin plugin, Player player) {
 		this(inventory, plugin, (T) new MenuProfile(player));
 		
 	}
@@ -182,7 +214,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param size The size of the inventory
 	 * @param name The name of the inventory
 	 */
-	public GuiInventory(int size, Component name, JavaPlugin plugin, Player player) {
+	protected GuiInventory(int size, Component name, JavaPlugin plugin, Player player) {
 		this(Bukkit.createInventory(null, size, name), plugin, player);
 	}
 	
@@ -192,7 +224,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param inventorySize The size of the inventory
 	 * @param name The name of the inventory
 	 */
-	public GuiInventory(InventorySize inventorySize, Component name, JavaPlugin plugin, Player player) {
+	protected GuiInventory(InventorySize inventorySize, Component name, JavaPlugin plugin, Player player) {
 		this(Bukkit.createInventory(null, inventorySize.getSize(), name), plugin, player);
 	}
 	
@@ -201,21 +233,12 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 */
 	public abstract void addComponents();
 	
-	/**
-	 * Gets the inventory this GUI is wrapping
-	 *
-	 * @return The wrapped inventory
-	 */
-	public Inventory getInventory() {
-		return inventory;
-	}
-	
 	public int validateX(int x) {
-		return Math.min(Math.max(x, 0), (inventory.getSize() / maxRows));
+		return Math.min(Math.max(x, 0), (inventory.getSize() / MAX_ROWS));
 	}
 	
 	public int validateY(int y) {
-		return Math.min(Math.max(y, 0), maxColumns);
+		return Math.min(Math.max(y, 0), MAX_COLUMNS);
 	}
 	
 	public int validateFitting(int slot) {
@@ -273,7 +296,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param y The Y position to add the button at
 	 */
 	public void addButton(Button button, int x, int y) {
-		int slot = x + (y * maxRows);
+		int slot = x + (y * MAX_ROWS);
 		addButton(button, slot);
 	}
 	
@@ -456,7 +479,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	public void openSlots(int x1, int y1, int x2, int y2) {
 		for(int y = y1; y <= y2; y++){
 			for(int x = x1; x <= x2; x++){
-				openSlots.add(y * maxRows + x);
+				openSlots.add(y * MAX_ROWS + x);
 			}
 		}
 	}
@@ -493,18 +516,9 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	public void closeSlots(int x1, int y1, int x2, int y2) {
 		for(int y = y1; y <= y2; y++){
 			for(int x = x1; x <= x2; x++){
-				openSlots.remove(y * maxRows + x);
+				openSlots.remove(y * MAX_ROWS + x);
 			}
 		}
-	}
-	
-	/**
-	 * Gets the open slots
-	 *
-	 * @return The set of open slots
-	 */
-	public Set<Integer> getOpenSlots() {
-		return openSlots;
 	}
 	
 	/**
@@ -544,24 +558,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	}
 	
 	/**
-	 * Sets whether this GUI is destroyed when it has been closed by all viewers
-	 *
-	 * @param destroyOnClose Whether this GUI is destroyed when it has been closed by all viewers
-	 */
-	public void setDestroyOnClose(boolean destroyOnClose) {
-		this.destroyOnClose = destroyOnClose;
-	}
-	
-	/**
-	 * Sets a callback to be run when this GUI is destroyed
-	 *
-	 * @param onDestroy The callback
-	 */
-	public void setOnDestroy(Runnable onDestroy) {
-		this.onDestroy = onDestroy;
-	}
-	
-	/**
 	 * Sets the handler for when an open slot is clicked
 	 *
 	 * @param handler The handler for when an open slot is clicked
@@ -577,15 +573,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 */
 	public void setOnClickOpenSlot(BiConsumer<InventoryClickEvent, List<Integer>> handler) {
 		this.onClickOpenSlot = handler;
-	}
-	
-	/**
-	 * Sets the handler for when a slot in the player inventory is clicked (default behaviour is to cancel the event)
-	 *
-	 * @param onPlayerInventoryClick The handler for when a slot in the player inventory is clicked
-	 */
-	public void setOnPlayerInventoryClick(Consumer<InventoryClickEvent> onPlayerInventoryClick) {
-		this.onPlayerInventoryClick = onPlayerInventoryClick;
 	}
 	
 	/**
@@ -641,15 +628,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		buttons.clear();
 	}
 	
-	/**
-	 * Sets the handler for when items are drag-clicked into open slots
-	 *
-	 * @param onDrag The handler
-	 */
-	public void setOnDragOpenSlot(Consumer<InventoryDragEvent> onDrag) {
-		this.onDragOpenSlot = onDrag;
-	}
-	
 	@EventHandler
 	public void onDrag(InventoryDragEvent e) {
 		List<Integer> slots = e.getRawSlots().stream().filter(s -> getInventory(e.getView(), s).equals(inventory)).toList();
@@ -699,6 +677,10 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	public void onClick(InventoryClickEvent e) {
 		if(!inventory.equals(e.getView().getTopInventory())){
 			return;
+		}
+		
+		if(onClick != null){
+			onClick.accept(e);
 		}
 		
 		if(disabledClickEvents.contains(e.getClick())){
@@ -762,10 +744,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 				destroy((Player) e.getPlayer());
 			}
 		}
-	}
-	
-	public JavaPlugin getPlugin() {
-		return plugin;
 	}
 	
 	//---------------Default Click Handlers----------------
@@ -856,16 +834,12 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 * @param isValid The predicate that determines if the action is valid
 	 * @param action The action to run if the action is valid (Return true to consume the event and prevent any further click actions from trying to run after, false to let them run)
 	 */
-	public record ClickActionData(int weight, BiPredicate<InventoryClickEvent, GuiInventory> isValid,
-								  BiPredicate<InventoryClickEvent, GuiInventory> action){}
+	public record ClickActionData(int weight, BiPredicate<InventoryClickEvent, GuiInventory<?>> isValid,
+								  BiPredicate<InventoryClickEvent, GuiInventory<?>> action){}
 	
 	public void addAction(ClickActionData data) {
 		clickHandlers.add(data);
 		updateClickHandlers();
-	}
-	
-	public List<ClickActionData> getClickHandlers() {
-		return clickHandlers;
 	}
 	
 	public void updateClickHandlers() {
@@ -909,20 +883,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	}
 	
 	/**
-	 * @return The Owning players inventory profile
-	 */
-	public T getProfile() {
-		return profile;
-	}
-	
-	/**
-	 * @return The Owning player
-	 */
-	public Player getPlayer() {
-		return player;
-	}
-	
-	/**
 	 * Clears all pagination GUIs assigned to this GUI
 	 */
 	public void clearPaginationGuis() {
@@ -934,6 +894,49 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 */
 	public boolean isDestroyed() {
 		return isDestroyed;
+	}
+	
+	public Inventory getInventory() {
+		return inventory;
+	}
+	
+	/**
+	 * @param onDestroy {@link #onDestroy}
+	 */
+	public void setOnDestroy(Runnable onDestroy) {
+		this.onDestroy = onDestroy;
+	}
+	
+	/**
+	 *
+	 * @param onClick {@link #onClick}
+	 */
+	public void setOnClick(Consumer<InventoryClickEvent> onClick) {
+		this.onClick = onClick;
+	}
+	
+	/**
+	 *
+	 * @param onDragOpenSlot {@link #onDragOpenSlot}
+	 */
+	public void setOnDragOpenSlot(Consumer<InventoryDragEvent> onDragOpenSlot) {
+		this.onDragOpenSlot = onDragOpenSlot;
+	}
+	
+	/**
+	 *
+	 * @param onPlayerInventoryClick {@link #onPlayerInventoryClick}
+	 */
+	public void setOnPlayerInventoryClick(Consumer<InventoryClickEvent> onPlayerInventoryClick) {
+		this.onPlayerInventoryClick = onPlayerInventoryClick;
+	}
+	
+	public JavaPlugin getPlugin() {
+		return plugin;
+	}
+	
+	public Player getPlayer() {
+		return player;
 	}
 }
 	

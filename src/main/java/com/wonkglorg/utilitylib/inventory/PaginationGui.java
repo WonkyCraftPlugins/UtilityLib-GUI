@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.BiConsumer;
+import java.util.function.ObjIntConsumer;
 import java.util.stream.Collectors;
 
 /**
@@ -19,25 +19,31 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("unused")
 public final class PaginationGui{
-	//todo:jmd open specific pagination slots?
-	private GuiInventory gui;
+	
+	/**
+	 * The InventoryGUI this panel is in
+	 */
+	private final GuiInventory<?> gui;
+	/**
+	 * The current page of the panel
+	 */
 	private int page = 1;
 	
 	/**
 	 * A list that represents the entries in the panel the pagination is based on this lists ordering (if this ordering is modified so will the panel elements order) (to create an empty panel slot use null or leave the {@link PaginationEntry#object} null)
 	 */
 	private final ArrayList<PaginationEntry> entries = new ArrayList<>();
-	/**
-	 * All Slots this panel uses to display elements
-	 */
+	
 	private final Set<Integer> slots = new TreeSet<>();
-	/**
-	 * Runs on every update of the page
-	 */
+	
 	private Runnable onUpdate = () -> {
 	};
 	/**
 	 * The item to use to fill the rest with the empty slots
+	 * -- SETTER --
+	 * Sets the filler item
+	 * -- GETTER --
+	 * Gets the filler item
 	 */
 	private ItemStack fillerItem;
 	
@@ -66,9 +72,7 @@ public final class PaginationGui{
 	/**
 	 * A consumer that is called when an item is inserted into the panel
 	 */
-	private BiConsumer<ItemStack, Integer> onItemInsert = (item, index) -> entries.add(index, new PaginationEntry(item));
-	
-	//todo implement open slots to take from? would be pretty hard if the gui inventory handles it and not the pagination
+	private final ObjIntConsumer<ItemStack> onItemInsert = (item, index) -> entries.add(index, new PaginationEntry(item));
 	
 	/**
 	 * Constructs a PaginationPanel to work on a given InventoryGUI
@@ -89,15 +93,6 @@ public final class PaginationGui{
 	public PaginationGui(GuiInventory<MenuProfile> gui, ItemStack fillerItem) {
 		this.gui = gui;
 		this.fillerItem = fillerItem;
-	}
-	
-	/**
-	 * Sets a task to be run whenever the page updates, can be used to update a page indicator or similar
-	 *
-	 * @param onUpdate The task to be run on update
-	 */
-	public void setOnUpdate(Runnable onUpdate) {
-		this.onUpdate = onUpdate;
 	}
 	
 	/**
@@ -226,13 +221,6 @@ public final class PaginationGui{
 		while(start <= index){
 			entries.add(start++, null);
 		}
-	}
-	
-	/**
-	 * @return The page this panel is currently on
-	 */
-	public int getPage() {
-		return page;
 	}
 	
 	/**
@@ -560,41 +548,12 @@ public final class PaginationGui{
 		gui.update();
 	}
 	
-	/**
-	 * Sets the filler item
-	 */
-	public void setFillerItem(ItemStack item) {
-		this.fillerItem = item;
-	}
-	
-	/**
-	 * Gets the filler item
-	 */
-	public ItemStack getFillerItem() {
-		return fillerItem;
-	}
-	
 	public int getButtonSize() {
 		return getButtons().size();
 	}
 	
 	public int getSlotSize() {
 		return slots.size();
-	}
-	
-	/**
-	 * @return The slots used by this panel
-	 */
-	public Set<Integer> getSlots() {
-		return slots;
-	}
-	
-	public void setOnItemInsert(BiConsumer<ItemStack, Integer> onItemInsert) {
-		this.onItemInsert = onItemInsert;
-	}
-	
-	public BiConsumer<ItemStack, Integer> getOnItemInsert() {
-		return onItemInsert;
 	}
 	
 	public int getEntrySize() {
@@ -643,5 +602,24 @@ public final class PaginationGui{
 		public boolean isItem() {
 			return object instanceof ItemStack;
 		}
+	}
+	
+	/**
+	 * @return {@link #page}
+	 */
+	public int getPage() {
+		return page;
+	}
+	
+	/**
+	 *
+	 * @param onUpdate
+	 */
+	public void setOnUpdate(Runnable onUpdate) {
+		this.onUpdate = onUpdate;
+	}
+	
+	public Set<Integer> getSlots() {
+		return slots;
 	}
 }

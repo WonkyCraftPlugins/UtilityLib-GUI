@@ -3,6 +3,7 @@ package com.wonkglorg.utilitylib.inventory.specialised;
 
 import com.wonkglorg.utilitylib.inventory.Button;
 import com.wonkglorg.utilitylib.inventory.GuiInventory;
+import com.wonkglorg.utilitylib.inventory.profile.MenuProfile;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -14,13 +15,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 
 @SuppressWarnings("unused")
-public abstract class GuiCrafter extends GuiInventory {
+public abstract class GuiCrafter<T extends MenuProfile> extends GuiInventory<T> {
 
-    public GuiCrafter(Component name, JavaPlugin plugin, Player player) {
+    protected GuiCrafter(Component name, JavaPlugin plugin, Player player) {
         super(Bukkit.createInventory(player, InventoryType.CRAFTER, name), plugin, player);
     }
 
-    public GuiCrafter(JavaPlugin plugin, Player player) {
+    protected GuiCrafter(JavaPlugin plugin, Player player) {
         super(Bukkit.createInventory(null, InventoryType.CRAFTER), plugin, player);
     }
 

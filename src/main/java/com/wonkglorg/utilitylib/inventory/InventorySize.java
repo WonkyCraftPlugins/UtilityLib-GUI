@@ -1,13 +1,14 @@
 package com.wonkglorg.utilitylib.inventory;
 
 public enum InventorySize{
-	TINY(9),
-	SMALL(18),
-	MEDIUM(27),
-	BIG(36),
-	LARGE(45),
-	MAX(54);
+	SIZE_9(9),
+	SIZE_18(18),
+	SIZE_27(27),
+	SIZE_36(36),
+	SIZE_45(45),
+	SIZE_54(54);
 	private final int size;
+	
 	
 	InventorySize(int size) {
 		this.size = size;

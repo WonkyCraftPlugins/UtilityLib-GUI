@@ -10,14 +10,15 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-//todo:wonkglorg add multiple menus to assign per person?, doesn't seem useful if anyone needs that they can just keep the GuiInventory object themselves, this is strictly for open menus.
-
 /**
  * Class to manage and store all the menus created
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked","unused"})
 public class GuiManager{
 	private static final Map<UUID, GuiInventory> menus = new HashMap<>();
+	
+	private GuiManager() {
+	}
 	
 	/**
 	 * Gets the menu of the uuid
