@@ -1,12 +1,12 @@
 package com.wonkglorg.utilitylib.inventory;
 
 public enum InventorySize{
-	SIZE_9(9),
-	SIZE_18(18),
-	SIZE_27(27),
-	SIZE_36(36),
-	SIZE_45(45),
-	SIZE_54(54);
+	ROWS_1(9),
+	ROWS_2(18),
+	ROWS_3(27),
+	ROWS_4(36),
+	ROWS_5(45),
+	ROWS_6(54);
 	private final int size;
 	
 	

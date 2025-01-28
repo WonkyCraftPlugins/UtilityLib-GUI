@@ -622,4 +622,8 @@ public final class PaginationGui{
 	public Set<Integer> getSlots() {
 		return slots;
 	}
+	
+	public void setFillerItem(ItemStack fillerItem) {
+		this.fillerItem = fillerItem;
+	}
 }
