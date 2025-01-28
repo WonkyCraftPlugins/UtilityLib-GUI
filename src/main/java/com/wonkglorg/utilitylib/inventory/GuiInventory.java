@@ -597,26 +597,33 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		if(isDestroyed){
 			return;
 		}
-		if(onDestroy != null){
-			onDestroy.run();
-		}
-		HandlerList.unregisterAll(this);
 		
-		if(returnItems && lastViewer != null){
-			for(int slot : openSlots){
-				ItemStack item = inventory.getItem(slot);
-				if(item != null){
-					lastViewer.getInventory().addItem(item).values().forEach(remainingItem -> lastViewer.getWorld()
-																										.dropItem(lastViewer.getLocation(),
-																												remainingItem));
+		isDestroyed = true;
+		
+		Bukkit.getScheduler().runTaskLater(plugin, () -> {
+			
+			if(onDestroy != null){
+				onDestroy.run();
+			}
+			HandlerList.unregisterAll(this);
+			
+			if(returnItems && lastViewer != null){
+				for(int slot : openSlots){
+					ItemStack item = inventory.getItem(slot);
+					if(item != null){
+						lastViewer.getInventory().addItem(item).values().forEach(remainingItem -> lastViewer.getWorld()
+																											.dropItem(lastViewer.getLocation(),
+																													remainingItem));
+					}
 				}
 			}
-		}
+			
+			inventory.clear();
+			buttons.clear();
+			
+			GuiManager.cleanup(player.getUniqueId());
+		}, 1);
 		
-		inventory.clear();
-		buttons.clear();
-		isDestroyed = true;
-		GuiManager.cleanup(player.getUniqueId());
 	}
 	
 	/**
