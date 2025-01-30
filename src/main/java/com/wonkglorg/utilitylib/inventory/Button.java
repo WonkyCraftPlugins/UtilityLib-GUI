@@ -9,7 +9,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * @author Redempt
+ * @author Wonkglorg
  */
 @SuppressWarnings("unused")
 public abstract class Button{
@@ -100,11 +100,11 @@ public abstract class Button{
 	 *
 	 * @param item The ItemStack to be used as the icon
 	 */
-	public Button(ItemStack item) {
+	private Button(ItemStack item) {
 		this.item = item;
 	}
 	
-	public Button(Component itemName, ItemStack item) {
+	private Button(Component itemName, ItemStack item) {
 		this.item = item;
 		ItemMeta itemMeta = item.getItemMeta();
 		if(itemMeta != null){
@@ -113,12 +113,12 @@ public abstract class Button{
 		}
 	}
 	
-	public Button(ItemStack item, int slot) {
+	private Button(ItemStack item, int slot) {
 		this.item = item;
 		this.slot = slot;
 	}
 	
-	public Button(Component itemName, ItemStack item, int slot) {
+	private Button(Component itemName, ItemStack item, int slot) {
 		this.item = item;
 		this.slot = slot;
 		ItemMeta itemMeta = item.getItemMeta();

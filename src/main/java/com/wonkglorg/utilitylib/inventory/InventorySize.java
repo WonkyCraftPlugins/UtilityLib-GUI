@@ -1,5 +1,8 @@
 package com.wonkglorg.utilitylib.inventory;
 
+/**
+ * Enum representing valid sizes of an inventory.
+ */
 public enum InventorySize{
 	ROWS_1(9),
 	ROWS_2(18),

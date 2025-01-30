@@ -9,11 +9,6 @@ import org.bukkit.entity.Player;
 public class MenuProfile implements Cloneable {
     /**
      * The owner of the menu
-	 * -- GETTER --
-	 *  Gets owner of the menu.
-	 *
-	 * @return {@link Player} owning the menu.
-	 
 	 */
     protected Player owner;
 

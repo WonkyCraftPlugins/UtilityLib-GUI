@@ -1,5 +1,6 @@
 package com.wonkglorg.utilitylib.inventory;
 
+import static com.wonkglorg.utilitylib.inventory.GuiInventory.MAX_ROWS;
 import com.wonkglorg.utilitylib.inventory.profile.MenuProfile;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -48,14 +49,6 @@ public final class PaginationGui{
 	private ItemStack fillerItem;
 	
 	/**
-	 * The maximum number of rows and columns in the panel
-	 */
-	private static final int maxRows = 9;
-	/**
-	 * The maximum number of columns in the panel
-	 */
-	private static final int maxColumns = 6;
-	/**
 	 * The previous button assigned to this panel (is not required only for convenience in #updatePageButtons)
 	 */
 	private Button previousButton;
@@ -67,7 +60,7 @@ public final class PaginationGui{
 	/**
 	 * IMPLEMENT LATER  IF SET TO TRUE THE PANEL WILL ALLOW INSERTIONS INTO THE PANEL SLOTS (DEFAULT FALSE)
 	 */
-	private boolean open = false;
+	private final boolean open = false; //NOSONAR
 	
 	/**
 	 * A consumer that is called when an item is inserted into the panel
@@ -224,13 +217,6 @@ public final class PaginationGui{
 	}
 	
 	/**
-	 * @return The max number of elements displayed on each page
-	 */
-	public int getPageSize() {
-		return slots.size();
-	}
-	
-	/**
 	 * @return The maximum page number of this panel with the current number of elements
 	 */
 	public int getMaxPage() {
@@ -271,7 +257,7 @@ public final class PaginationGui{
 	public void addSlots(int x1, int y1, int x2, int y2) {
 		for(int x = x1; x <= x2; x++){
 			for(int y = y1; y <= y2; y++){
-				slots.add((y * maxRows) + x);
+				slots.add((y * MAX_ROWS) + x);
 			}
 		}
 		updatePage();
@@ -315,7 +301,7 @@ public final class PaginationGui{
 		slots.forEach(gui::clearSlot);
 		for(int x = x1; x <= x2; x++){
 			for(int y = y1; y <= y2; y++){
-				slots.remove((y * maxRows) + x);
+				slots.remove((y * MAX_ROWS) + x);
 			}
 		}
 		updatePage();
@@ -334,7 +320,7 @@ public final class PaginationGui{
 		int start = (page - 1) * getPageSize();
 		int end = Math.min(entries.size(), page * getPageSize());
 		Iterator<Integer> iter = slots.iterator();
-		for(int i = start; i < end; i++){
+		for(int i = start; i < end; i++){ //NOSONAR
 			PaginationEntry paginationEntry = entries.get(i);
 			int slot = i - start;
 			if(paginationEntry == null){
@@ -385,7 +371,7 @@ public final class PaginationGui{
 					  .map(PaginationEntry::object)
 					  .filter(ItemStack.class::isInstance)
 					  .map(ItemStack.class::cast)
-					  .collect(Collectors.toList());
+					  .collect(Collectors.toList()); //NOSONAR
 		//@formatter:on
 	}
 	
@@ -398,7 +384,7 @@ public final class PaginationGui{
 					  .map(PaginationEntry::object)
 					  .filter(Button.class::isInstance)
 					  .map(Button.class::cast)
-					  .collect(Collectors.toList());
+					  .collect(Collectors.toList()); //NOSONAR
 		//@formatter:on
 	}
 	
@@ -496,7 +482,7 @@ public final class PaginationGui{
 	 * @param object the object reference (Button or ItemStack)
 	 * @param index the index of the object in the entries list
 	 */
-	public void onInventoryEvent(InventoryClickEvent event, Object object, int index) {
+	public void onInventoryEvent(InventoryClickEvent event, Object object, int index) { //NOSONAR
 		if(object instanceof Button button){
 			button.onClick(event);
 			event.setCancelled(true);
@@ -520,8 +506,8 @@ public final class PaginationGui{
 	/**
 	 * updates the page buttons based on the current page count, set 2 buttons for previous and next to replace them if not needed
 	 *
-	 * @param previousButtonReplacer
-	 * @param nextButtonReplacer
+	 * @param previousButtonReplacer the button to replace the previous button with if not needed
+	 * @param nextButtonReplacer the button to replace the next button with if not needed
 	 */
 	public void updatePageButtons(Button previousButtonReplacer, Button nextButtonReplacer) {
 		if(previousButton == null || nextButton == null){
@@ -548,28 +534,15 @@ public final class PaginationGui{
 		gui.update();
 	}
 	
-	public int getButtonSize() {
-		return getButtons().size();
-	}
-	
-	public int getSlotSize() {
-		return slots.size();
-	}
-	
-	public int getEntrySize() {
-		return entries.size();
-	}
-	
 	/**
 	 * Represents an entry in the pagination panel
 	 *
 	 * @param object the object reference (Button or ItemStack)
 	 */
 	private record PaginationEntry(Object object){
+		
 		/**
-		 * Returns the objects itemstack (either directly or in the form of a buttons itemstack)
-		 *
-		 * @return
+		 * @return the objects itemstack (either directly or in the form of a buttons itemstack)
 		 */
 		public ItemStack getItemStack() {
 			if(object instanceof ItemStack item){
@@ -604,26 +577,30 @@ public final class PaginationGui{
 		}
 	}
 	
-	/**
-	 * @return {@link #page}
-	 */
 	public int getPage() {
 		return page;
 	}
 	
+	public int getButtonSize() {
+		return getButtons().size();
+	}
+	
+	public int getSlotSize() {
+		return slots.size();
+	}
+	
+	public int getEntrySize() {
+		return entries.size();
+	}
+	
+	public void setOnUpdate(Runnable onUpdate) {this.onUpdate = onUpdate;}
+	
+	public Set<Integer> getSlots() {return slots;}
+	
+	public void setFillerItem(ItemStack fillerItem) {this.fillerItem = fillerItem;}
+	
 	/**
-	 *
-	 * @param onUpdate
+	 * @return The max number of elements displayed on each page
 	 */
-	public void setOnUpdate(Runnable onUpdate) {
-		this.onUpdate = onUpdate;
-	}
-	
-	public Set<Integer> getSlots() {
-		return slots;
-	}
-	
-	public void setFillerItem(ItemStack fillerItem) {
-		this.fillerItem = fillerItem;
-	}
+	public int getPageSize() {return slots.size();}
 }
