@@ -443,8 +443,8 @@ public final class PaginationGui{
 	 * @param slot the slot of the button
 	 */
 	public void setPreviousButton(Button button, int slot) {
-		this.previousButton = button;
 		button.setSlot(slot);
+		this.previousButton = button;
 	}
 	
 	/**
@@ -453,8 +453,8 @@ public final class PaginationGui{
 	 * @param slot the slot of the button
 	 */
 	public void setNextButton(Button button, int slot) {
-		this.nextButton = button;
 		button.setSlot(slot);
+		this.nextButton = button;
 	}
 	
 	/**
