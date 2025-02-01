@@ -452,7 +452,7 @@ public final class PaginationGui{
 	 *
 	 * @param fillerItem the item to use as a filler
 	 */
-	public void updatePageButtons(ItemStack fillerItem) {
+	public void updatePageChangeButtons(ItemStack fillerItem) {
 		if(previousButton == null || nextButton == null){
 			return;
 		}
@@ -499,8 +499,8 @@ public final class PaginationGui{
 	/**
 	 * updates the page buttons based on the current page count with the default filler item
 	 */
-	public void updatePageButtons() {
-		updatePageButtons(fillerItem);
+	public void updatePageChangeButtons() {
+		updatePageChangeButtons(fillerItem);
 	}
 	
 	/**
@@ -509,7 +509,7 @@ public final class PaginationGui{
 	 * @param previousButtonReplacer the button to replace the previous button with if not needed
 	 * @param nextButtonReplacer the button to replace the next button with if not needed
 	 */
-	public void updatePageButtons(Button previousButtonReplacer, Button nextButtonReplacer) {
+	public void updatePageChangeButtons(Button previousButtonReplacer, Button nextButtonReplacer) {
 		if(previousButton == null || nextButton == null){
 			return;
 		}
