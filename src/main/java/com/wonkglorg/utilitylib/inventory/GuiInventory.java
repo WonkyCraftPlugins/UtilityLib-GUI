@@ -781,10 +781,18 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		}
 	}
 	
+	public void clearPaginationGui(PaginationGui paginationGui) {
+		paginationGuis.remove(paginationGui);
+		paginationGui.clear();
+	}
+	
 	/**
 	 * Clears all pagination GUIs assigned to this GUI
 	 */
 	public void clearPaginationGuis() {
+		for(PaginationGui paginationGui : paginationGuis){
+			paginationGui.clear();
+		}
 		paginationGuis.clear();
 	}
 	
