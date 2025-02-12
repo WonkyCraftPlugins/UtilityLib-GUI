@@ -109,7 +109,7 @@ public class GuiManager{
 	 * @param uuid The uuid to add the menu to
 	 * @param menu The menu to add
 	 */
-	public static void addMenu(UUID uuid, GuiInventory menu) {
+	public static <T extends GuiInventory> void addMenu(UUID uuid, T menu) {
 		GuiInventory inventory = menus.put(uuid, menu);
 		if(inventory != null){
 			inventory.destroy();

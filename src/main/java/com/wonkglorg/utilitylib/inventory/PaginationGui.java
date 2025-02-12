@@ -322,7 +322,7 @@ public final class PaginationGui{
 		Iterator<Integer> iter = slots.iterator();
 		for(int i = start; i < end; i++){ //NOSONAR
 			PaginationEntry paginationEntry = entries.get(i);
-			int slot = i - start;
+			int slot = iter.next();
 			if(paginationEntry == null){
 				gui.addItem(fillerItem, slot);
 				continue;
