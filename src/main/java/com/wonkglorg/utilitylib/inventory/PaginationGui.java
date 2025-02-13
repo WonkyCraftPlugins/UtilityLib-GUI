@@ -2,6 +2,7 @@ package com.wonkglorg.utilitylib.inventory;
 
 import static com.wonkglorg.utilitylib.inventory.GuiInventory.MAX_ROWS;
 import com.wonkglorg.utilitylib.inventory.profile.MenuProfile;
+import org.bukkit.entity.Item;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -346,6 +347,7 @@ public final class PaginationGui{
 			}
 		}
 		onUpdate.run();
+		updatePageChangeButtons();
 	}
 	
 	/**
@@ -449,20 +451,42 @@ public final class PaginationGui{
 	 * @param button the button
 	 * @param slot the slot of the button
 	 */
-	public void setPreviousButton(Button button, int slot) {
+	public void setPreviousPageButton(Button button, int slot) {
 		button.setSlot(slot);
 		this.previousButton = button;
 	}
+	
+	/**
+	 * Sets the previous button for page navigation used by {@link #updatePageChangeButtons()}
+	 * @param item the previous page icon
+	 * @param slot the slot of the button
+	 */
+	public void setPreviousPageButton(ItemStack item, int slot) {
+		setPreviousPageButton(Button.create(item,e -> prevPage()), slot);
+	}
+	
 	
 	/**
 	 * Sets the next button for page navigation used by {@link #updatePageChangeButtons()}
 	 * @param button the button
 	 * @param slot the slot of the button
 	 */
-	public void setNextButton(Button button, int slot) {
+	public void setNextPageButton(Button button, int slot) {
 		button.setSlot(slot);
 		this.nextButton = button;
 	}
+	
+	
+	/**
+	 * Sets the next button for page navigation used by {@link #updatePageChangeButtons()}
+	 * @param item the next page icon
+	 * @param slot the slot of the button
+	 */
+	public void setNextPageButton(ItemStack item, int slot) {
+		setNextPageButton(Button.create(item,e -> nextPage()), slot);
+	}
+	
+	
 	
 	/**
 	 * Sets the previous and next buttons for page navigation used by {@link #updatePageChangeButtons()}
@@ -472,9 +496,23 @@ public final class PaginationGui{
 	 * @param nextSlot the slot of the next button
 	 */
 	public void setPageSwapButtons(Button previousButton, int previousSlot, Button nextButton, int nextSlot) {
-		setPreviousButton(previousButton, previousSlot);
-		setNextButton(nextButton, nextSlot);
+		setPreviousPageButton(previousButton, previousSlot);
+		setNextPageButton(nextButton, nextSlot);
 	}
+	
+	
+	/**
+	 * Sets the previous and next buttons for page navigation used by {@link #updatePageChangeButtons()}
+	 * @param previousButton the previous page icon
+	 * @param previousSlot the slot of the previous button
+	 * @param nextButton the next page icon
+	 * @param nextSlot the slot of the next button
+	 */
+	public void setPageSwapButtons(ItemStack previousButton, int previousSlot, ItemStack nextButton, int nextSlot) {
+		setPreviousPageButton(previousButton, previousSlot);
+		setNextPageButton(nextButton, nextSlot);
+	}
+	
 	
 	/**
 	 * updates the page buttons based on the current page count with an itemstack
