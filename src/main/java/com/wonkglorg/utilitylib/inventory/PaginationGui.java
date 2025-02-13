@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
 import java.util.stream.Collectors;
 
@@ -66,6 +67,12 @@ public final class PaginationGui{
 	 * A consumer that is called when an item is inserted into the panel
 	 */
 	private final ObjIntConsumer<ItemStack> onItemInsert = (item, index) -> entries.add(index, new PaginationEntry(item));
+	
+	/**
+	 * Called whenever a click event happens for this pagination menu, this happens before any buttons fire their click events
+	 */
+	private Consumer<ClickData> onClick = event -> {
+	};
 	
 	/**
 	 * Constructs a PaginationPanel to work on a given InventoryGUI
@@ -500,11 +507,16 @@ public final class PaginationGui{
 	}
 	
 	/**
+	 * FOR INTERNAL USE ONLY
 	 * @param event the event
 	 * @param object the object reference (Button or ItemStack)
 	 * @param index the index of the object in the entries list
 	 */
 	public void onInventoryEvent(InventoryClickEvent event, Object object, int index) { //NOSONAR
+		if(onClick != null){
+			onClick.accept(new ClickData(event, this, object, index));
+		}
+		
 		if(object instanceof Button button){
 			button.onClick(event);
 			event.setCancelled(true);
@@ -589,7 +601,7 @@ public final class PaginationGui{
 	 * @param object the clicked object reference (Button or ItemStack)
 	 * @param index the index of the object in the entries list
 	 */
-	private record ClickData(InventoryClickEvent event, PaginationGui gui, Object object, int index){
+	public record ClickData(InventoryClickEvent event, PaginationGui gui, Object object, int index){
 		public boolean isButton() {
 			return object instanceof Button;
 		}
@@ -625,4 +637,9 @@ public final class PaginationGui{
 	 * @return The max number of elements displayed on each page
 	 */
 	public int getPageSize() {return slots.size();}
+	
+	
+	public void setOnClick(Consumer<ClickData> onClick) {
+		this.onClick = onClick;
+	}
 }
