@@ -82,7 +82,6 @@ public final class PaginationGui{
 	 */
 	public PaginationGui(GuiInventory<MenuProfile> gui) {
 		this(gui, null);
-		gui.addPaginationGui(this);
 	}
 	
 	/**
@@ -94,6 +93,7 @@ public final class PaginationGui{
 	public PaginationGui(GuiInventory<MenuProfile> gui, ItemStack fillerItem) {
 		this.gui = gui;
 		this.fillerItem = fillerItem;
+		gui.addPaginationGui(this);
 	}
 	
 	/**
