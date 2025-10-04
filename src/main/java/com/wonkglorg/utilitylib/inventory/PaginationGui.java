@@ -2,7 +2,6 @@ package com.wonkglorg.utilitylib.inventory;
 
 import static com.wonkglorg.utilitylib.inventory.GuiInventory.MAX_ROWS;
 import com.wonkglorg.utilitylib.inventory.profile.MenuProfile;
-import org.bukkit.entity.Item;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -12,13 +11,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
-import java.util.function.ObjIntConsumer;
 import java.util.stream.Collectors;
 
 /**
  * A panel in an InventoryGUI which can be used to paginate items and buttons
  *
- * @author Redempt
+ * @author Redempt, Wonkglorg
  */
 @SuppressWarnings("unused")
 public final class PaginationGui{
@@ -60,16 +58,6 @@ public final class PaginationGui{
 	private Button nextButton;
 	
 	/**
-	 * IMPLEMENT LATER  IF SET TO TRUE THE PANEL WILL ALLOW INSERTIONS INTO THE PANEL SLOTS (DEFAULT FALSE)
-	 */
-	private final boolean open = false; //NOSONAR
-	
-	/**
-	 * A consumer that is called when an item is inserted into the panel
-	 */
-	private final ObjIntConsumer<ItemStack> onItemInsert = (item, index) -> entries.add(index, new PaginationEntry(item));
-	
-	/**
 	 * Called whenever a click event happens for this pagination menu, this happens before any buttons fire their click events
 	 */
 	private Consumer<ClickData> onClick = event -> {
@@ -82,7 +70,6 @@ public final class PaginationGui{
 	 */
 	public PaginationGui(GuiInventory<MenuProfile> gui) {
 		this(gui, null);
-		gui.addPaginationGui(this);
 	}
 	
 	/**
@@ -94,6 +81,7 @@ public final class PaginationGui{
 	public PaginationGui(GuiInventory<MenuProfile> gui, ItemStack fillerItem) {
 		this.gui = gui;
 		this.fillerItem = fillerItem;
+		gui.addPaginationGui(this);
 	}
 	
 	/**
@@ -448,6 +436,7 @@ public final class PaginationGui{
 	
 	/**
 	 * Sets the previous button for page navigation used by {@link #updatePageChangeButtons()}
+	 *
 	 * @param button the button
 	 * @param slot the slot of the button
 	 */
@@ -458,16 +447,17 @@ public final class PaginationGui{
 	
 	/**
 	 * Sets the previous button for page navigation used by {@link #updatePageChangeButtons()}
+	 *
 	 * @param item the previous page icon
 	 * @param slot the slot of the button
 	 */
 	public void setPreviousPageButton(ItemStack item, int slot) {
-		setPreviousPageButton(Button.create(item,e -> prevPage()), slot);
+		setPreviousPageButton(Button.create(item, e -> prevPage()), slot);
 	}
-	
 	
 	/**
 	 * Sets the next button for page navigation used by {@link #updatePageChangeButtons()}
+	 *
 	 * @param button the button
 	 * @param slot the slot of the button
 	 */
@@ -476,20 +466,19 @@ public final class PaginationGui{
 		this.nextButton = button;
 	}
 	
-	
 	/**
 	 * Sets the next button for page navigation used by {@link #updatePageChangeButtons()}
+	 *
 	 * @param item the next page icon
 	 * @param slot the slot of the button
 	 */
 	public void setNextPageButton(ItemStack item, int slot) {
-		setNextPageButton(Button.create(item,e -> nextPage()), slot);
+		setNextPageButton(Button.create(item, e -> nextPage()), slot);
 	}
-	
-	
 	
 	/**
 	 * Sets the previous and next buttons for page navigation used by {@link #updatePageChangeButtons()}
+	 *
 	 * @param previousButton the previous button
 	 * @param previousSlot the slot of the previous button
 	 * @param nextButton the next button
@@ -500,9 +489,9 @@ public final class PaginationGui{
 		setNextPageButton(nextButton, nextSlot);
 	}
 	
-	
 	/**
 	 * Sets the previous and next buttons for page navigation used by {@link #updatePageChangeButtons()}
+	 *
 	 * @param previousButton the previous page icon
 	 * @param previousSlot the slot of the previous button
 	 * @param nextButton the next page icon
@@ -512,7 +501,6 @@ public final class PaginationGui{
 		setPreviousPageButton(previousButton, previousSlot);
 		setNextPageButton(nextButton, nextSlot);
 	}
-	
 	
 	/**
 	 * updates the page buttons based on the current page count with an itemstack
@@ -546,6 +534,7 @@ public final class PaginationGui{
 	
 	/**
 	 * FOR INTERNAL USE ONLY
+	 *
 	 * @param event the event
 	 * @param object the object reference (Button or ItemStack)
 	 * @param index the index of the object in the entries list
@@ -557,11 +546,6 @@ public final class PaginationGui{
 		
 		if(object instanceof Button button){
 			button.onClick(event);
-			event.setCancelled(true);
-			return;
-		}
-		
-		if(!open){
 			event.setCancelled(true);
 		}
 		
@@ -676,8 +660,8 @@ public final class PaginationGui{
 	 */
 	public int getPageSize() {return slots.size();}
 	
-	
 	public void setOnClick(Consumer<ClickData> onClick) {
 		this.onClick = onClick;
 	}
+	
 }

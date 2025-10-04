@@ -5,7 +5,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 @SuppressWarnings("unused")
-public class InventoryItems{
+public class InventoryItems implements Cloneable{
+	
 	
 	public static final ItemStack BLACK_FILLER = createFiller(Material.BLACK_STAINED_GLASS_PANE);
 	public static final ItemStack GRAY_FILLER = createFiller(Material.GRAY_STAINED_GLASS_PANE);
@@ -23,7 +24,6 @@ public class InventoryItems{
 	public static final ItemStack MAGENTA_FILLER = createFiller(Material.MAGENTA_STAINED_GLASS_PANE);
 	public static final ItemStack BROWN_FILLER = createFiller(Material.BROWN_STAINED_GLASS_PANE);
 	public static final ItemStack LIGHT_GRAY_FILLER = createFiller(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
-	public static final ItemStack CYAN_STAINED_GLASS_PANE = createFiller(Material.CYAN_STAINED_GLASS_PANE);
 	
 	private InventoryItems() {
 		//Utility class
@@ -42,5 +42,4 @@ public class InventoryItems{
 		filler.setItemMeta(meta);
 		return filler;
 	}
-	
 }
