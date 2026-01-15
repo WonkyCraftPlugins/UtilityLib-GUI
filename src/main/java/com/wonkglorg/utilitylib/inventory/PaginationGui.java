@@ -1,7 +1,6 @@
 package com.wonkglorg.utilitylib.inventory;
 
 import static com.wonkglorg.utilitylib.inventory.GuiInventory.MAX_ROWS;
-import com.wonkglorg.utilitylib.inventory.profile.MenuProfile;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -68,7 +67,7 @@ public final class PaginationGui{
 	 *
 	 * @param gui The InventoryGUI to paginate
 	 */
-	public PaginationGui(GuiInventory<MenuProfile> gui) {
+	public PaginationGui(GuiInventory<?> gui) {
 		this(gui, null);
 	}
 	
@@ -78,7 +77,7 @@ public final class PaginationGui{
 	 * @param gui The InventoryGUI to paginate
 	 * @param fillerItem The item to use for the background
 	 */
-	public PaginationGui(GuiInventory<MenuProfile> gui, ItemStack fillerItem) {
+	public PaginationGui(GuiInventory<?> gui, ItemStack fillerItem) {
 		this.gui = gui;
 		this.fillerItem = fillerItem;
 		gui.addPaginationGui(this);
