@@ -600,14 +600,13 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		if(!inventory.equals(e.getView().getTopInventory())){
 			return;
 		}
-		
-		if(onClick != null){
-			onClick.accept(e);
-		}
-		
 		if(disabledClickEvents.contains(e.getClick())){
 			e.setCancelled(true);
 			return;
+		}
+		
+		if(onClick != null){
+			onClick.accept(e);
 		}
 		
 		//if its a pagination button let the pagination gui handle it

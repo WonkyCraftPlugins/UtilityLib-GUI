@@ -545,10 +545,8 @@ public final class PaginationGui{
 		
 		if(object instanceof Button button){
 			button.onClick(event);
-			event.setCancelled(true);
 		}
-		
-		//updatePage();
+		event.setCancelled(true);
 	}
 	
 	/**
