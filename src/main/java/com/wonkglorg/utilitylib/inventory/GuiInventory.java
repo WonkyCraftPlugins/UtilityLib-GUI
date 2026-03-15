@@ -487,6 +487,11 @@ public abstract class GuiInventory<T extends MenuProfile>{
 	 * Opens this GUI for a player
 	 */
 	public void open() {
+		try{
+			GuiManager instance = GuiManager.instance();
+		} catch(Exception e){
+			throw new IllegalStateException("Unable to open menu gui manager is not initialized!", e);
+		}
 		addComponents();
 		GuiManager.addMenu(getPlayer().getUniqueId(), this);
 		profile.getOwner().openInventory(inventory);
