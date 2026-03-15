@@ -487,6 +487,7 @@ public abstract class GuiInventory<T extends MenuProfile>{
 	 * Opens this GUI for a player
 	 */
 	public void open() {
+		profile.getOwner().closeInventory();
 		try{
 			GuiManager instance = GuiManager.instance();
 		} catch(Exception e){
@@ -520,7 +521,7 @@ public abstract class GuiInventory<T extends MenuProfile>{
 	 *
 	 * @param lastViewer The last Player who was viewing this GUI, to have the items returned to them.
 	 */
-	public void destroy(Player lastViewer) {
+	public void destroy(Player lastViewer, boolean removeFromManager) {
 		if(isDestroyed){
 			return;
 		}
@@ -544,8 +545,17 @@ public abstract class GuiInventory<T extends MenuProfile>{
 		
 		inventory.clear();
 		buttons.clear();
-		
-		GuiManager.cleanup(getPlayer().getUniqueId());
+		if(removeFromManager){
+			GuiManager.cleanup(getPlayer().getUniqueId());
+		}
+	}
+	/**
+	 * Remove this inventory as a listener and clean everything up to prevent memory leaks. Call this when the GUI is no longer being used.
+	 *
+	 * @param lastViewer The last Player who was viewing this GUI, to have the items returned to them.
+	 */
+	public void destroy(Player lastViewer) {
+		destroy(lastViewer, true);
 	}
 	
 	/**

@@ -71,7 +71,7 @@ public class GuiManager implements Listener{
 		while(iterator.hasNext()){
 			GuiInventory next = iterator.next();
 			if(next.getInventory().equals(e.getView().getTopInventory()) && e.getViewers().size() <= 1){
-				next.destroy((Player) e.getPlayer());
+				next.destroy((Player) e.getPlayer(), false);
 				iterator.remove();
 			}
 		}
