@@ -606,7 +606,7 @@ public abstract class GuiInventory<T extends MenuProfile>{
 	}
 	
 	public void onClick(InventoryClickEvent e) { //NOSONAR
-		if(disableDragEvent){
+		if(disableClickEvent){
 			e.setCancelled(true);
 			return;
 		}
