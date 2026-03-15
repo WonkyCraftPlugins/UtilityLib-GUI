@@ -1,6 +1,8 @@
 package com.wonkglorg.utilitylib.inventory;
 
 import static com.wonkglorg.utilitylib.inventory.GuiInventory.MAX_ROWS;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -27,6 +29,7 @@ public final class PaginationGui{
 	/**
 	 * The current page of the panel
 	 */
+	@Getter
 	private int page = 1;
 	
 	/**
@@ -34,8 +37,10 @@ public final class PaginationGui{
 	 */
 	private final ArrayList<PaginationEntry> entries = new ArrayList<>();
 	
+	@Getter
 	private final Set<Integer> slots = new TreeSet<>();
 	
+	@Setter
 	private Runnable onUpdate = () -> {
 	};
 	/**
@@ -45,6 +50,7 @@ public final class PaginationGui{
 	 * -- GETTER --
 	 * Gets the filler item
 	 */
+	@Setter
 	private ItemStack fillerItem;
 	
 	/**
@@ -59,6 +65,7 @@ public final class PaginationGui{
 	/**
 	 * Called whenever a click event happens for this pagination menu, this happens before any buttons fire their click events
 	 */
+	@Setter
 	private Consumer<ClickData> onClick = event -> {
 	};
 	
@@ -630,10 +637,6 @@ public final class PaginationGui{
 		}
 	}
 	
-	public int getPage() {
-		return page;
-	}
-	
 	public int getButtonSize() {
 		return getButtons().size();
 	}
@@ -646,19 +649,9 @@ public final class PaginationGui{
 		return entries.size();
 	}
 	
-	public void setOnUpdate(Runnable onUpdate) {this.onUpdate = onUpdate;}
-	
-	public Set<Integer> getSlots() {return slots;}
-	
-	public void setFillerItem(ItemStack fillerItem) {this.fillerItem = fillerItem;}
-	
 	/**
 	 * @return The max number of elements displayed on each page
 	 */
 	public int getPageSize() {return slots.size();}
-	
-	public void setOnClick(Consumer<ClickData> onClick) {
-		this.onClick = onClick;
-	}
 	
 }

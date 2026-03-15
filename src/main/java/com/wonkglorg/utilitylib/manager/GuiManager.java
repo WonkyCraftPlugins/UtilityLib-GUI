@@ -2,22 +2,88 @@ package com.wonkglorg.utilitylib.manager;
 
 import com.wonkglorg.utilitylib.inventory.GuiInventory;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 /**
  * Class to manage and store all the menus created
  */
-@SuppressWarnings({"rawtypes", "unchecked","unused"})
-public class GuiManager{
+@SuppressWarnings({"rawtypes", "unchecked", "unused"})
+public class GuiManager implements Listener{
+	private static GuiManager instance;
 	private static final Map<UUID, GuiInventory> menus = new HashMap<>();
 	
-	private GuiManager() {
+	private GuiManager(JavaPlugin plugin) {
+		plugin.getServer().getPluginManager().registerEvents(this, plugin);
+	}
+	
+	/**
+	 * Creates a new instance of the GuiManager
+	 *
+	 * @param plugin the plugin to create the instance for
+	 * @return the created instance
+	 */
+	public static GuiManager createInstance(JavaPlugin plugin) {
+		if(instance == null){
+			instance = new GuiManager(plugin);
+		}
+		return instance;
+	}
+	
+	/**
+	 * Gets the instance of the GuiManager use {@link GuiManager#createInstance(JavaPlugin)} before to initialize the instance
+	 *
+	 * @return the instance of the GuiManager or null if not initialized correctly
+	 */
+	public static GuiManager instance() {
+		if(instance == null){
+			throw new IllegalStateException("GuiManager instance has not been initialized!");
+		}
+		return instance;
+	}
+	
+	@EventHandler
+	public void onClick(InventoryClickEvent e) { //NOSONAR
+		if(menus.isEmpty()) return;
+		for(var menu : menus.values()){
+			if(menu.getInventory().equals(e.getView().getTopInventory())){
+				menu.onClick(e);
+				return;
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onClose(InventoryCloseEvent e) {
+		if(menus.isEmpty()) return;
+		Iterator<GuiInventory> iterator = menus.values().iterator();
+		while(iterator.hasNext()){
+			GuiInventory next = iterator.next();
+			if(next.getInventory().equals(e.getView().getTopInventory()) && e.getViewers().size() <= 1){
+				next.destroy((Player) e.getPlayer());
+				iterator.remove();
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onDrag(InventoryDragEvent e) {
+		if(menus.isEmpty()) return;
+		for(var menu : menus.values()){
+			List<Integer> slots = e.getRawSlots().stream().filter(s -> menu.getInventory(e.getView(), s).equals(menu.getInventory())).toList();
+			menu.onDrag(e, slots);
+		}
 	}
 	
 	/**
@@ -75,6 +141,7 @@ public class GuiManager{
 		if(inventory == null){
 			return;
 		}
+		inventory.destroy();
 		inventory.getPlayer().closeInventory();
 	}
 	
@@ -82,24 +149,12 @@ public class GuiManager{
 	 * Cleans up all menus and destroys all menus for all players
 	 */
 	public static void cleanup() {
-		for(var player : menus.keySet()){
-			cleanup(player);
-		}
-	}
-	
-	/**
-	 * Cleans up all menus and destroys all menus for all players, sends a message to the player when the menu is closed
-	 */
-	public static void cleanup(Consumer<Player> onInventoryClose) {
-		for(var player : menus.keySet()){
-			var inventory = menus.remove(player);
-			if(inventory == null){
-				return;
-			}
-			inventory.getPlayer().closeInventory();
-			if(onInventoryClose != null){
-				onInventoryClose.accept(inventory.getPlayer());
-			}
+		Iterator<GuiInventory> iterator = menus.values().iterator();
+		while(iterator.hasNext()){
+			GuiInventory next = iterator.next();
+			next.destroy();
+			next.getPlayer().closeInventory();
+			iterator.remove();
 		}
 	}
 	

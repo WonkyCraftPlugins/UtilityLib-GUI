@@ -2,17 +2,15 @@ package com.wonkglorg.utilitylib.inventory;
 
 import com.wonkglorg.utilitylib.inventory.profile.MenuProfile;
 import com.wonkglorg.utilitylib.manager.GuiManager;
+import lombok.Getter;
+import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -38,7 +36,7 @@ import java.util.function.Consumer;
  * @author Redempt, Wonkglorg
  */
 @SuppressWarnings({"unused", "unchecked"})
-public abstract class GuiInventory<T extends MenuProfile> implements Listener{
+public abstract class GuiInventory<T extends MenuProfile>{
 	
 	private static final Cleaner cleaner = Cleaner.create();
 	
@@ -53,11 +51,13 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	/**
 	 * The plugin owning this GUI
 	 */
+	@Getter
 	protected final JavaPlugin plugin;
 	
 	/**
 	 * The backing minecraft inventory
 	 */
+	@Getter
 	private final Inventory inventory;
 	/**
 	 * The slots that are open for items to be placed in and moved out of (0-indexed) this gets ignored by the pagination gui if used in the same inventory region, (this does not include {@link #returnItems} this will always return items in open slots even if they include pagination slots)
@@ -66,11 +66,13 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	/**
 	 * Runs when the GUI is destroyed (should be used to clean up any resources)
 	 */
+	@Setter
 	private Runnable onDestroy;
 	
 	/**
 	 * Runs when an inventory click is made (before any other click action or button action) can be used to debug or do something specific no matter what is being clicked this does not adhere to {@link #disabledClickEvents} and simply gets called for every event inside the menu
 	 */
+	@Setter
 	private Consumer<InventoryClickEvent> onClick = e -> {
 	};
 	/**
@@ -81,12 +83,14 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	/**
 	 * Runs when an inventory click is made in an open slot (0-indexed)
 	 */
+	@Setter
 	private Consumer<InventoryDragEvent> onDragOpenSlot = e -> {
 	};
 	
 	/**
 	 * Runs when a player clicks in the player inventory while the GUI is open
 	 */
+	@Setter
 	private Consumer<InventoryClickEvent> onPlayerInventoryClick = e -> {
 	};
 	
@@ -101,6 +105,13 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	
 	private final Set<ClickType> disabledClickEvents = new HashSet<>();
 	
+	@Getter
+	@Setter
+	private boolean disableDragEvent = false;
+	@Getter
+	@Setter
+	private boolean disableClickEvent = false;
+	
 	/**
 	 * The pagination GUIs that are part of this GUI (if any)
 	 */
@@ -109,6 +120,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	/**
 	 * The Owning players inventory profile
 	 */
+	@Getter
 	protected T profile;
 	
 	public static final int MAX_ROWS = 9;
@@ -117,16 +129,14 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	/**
 	 * Whether or not items in open slots are returned to the player when this inventory is destroyed, should be set to true for this to properly return the items otherwise it will only return items when the inventory is manually closed using {@link #destroy()}
 	 */
+	@Getter
+	@Setter
 	private boolean returnItems = true;
-	
-	/**
-	 * Sets whether this GUI is destroyed when it has been closed by all viewers
-	 */
-	private boolean destroyOnClose = true;
 	
 	/**
 	 * Whether or not the GUI has been destroyed (this menu should not be used anymore if it was marked as destroyed)
 	 */
+	@Getter
 	private boolean isDestroyed = false;
 	
 	/**
@@ -139,7 +149,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		this.profile = profile;
 		this.inventory = inventory;
 		cleaner.register(this, new CleanupTask(this));
-		Bukkit.getPluginManager().registerEvents(this, plugin);
 		registerDefaultClicks();
 	}
 	
@@ -532,7 +541,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		buttons.clear();
 		
 		GuiManager.cleanup(getPlayer().getUniqueId());
-		HandlerList.unregisterAll(this);
 	}
 	
 	/**
@@ -550,9 +558,11 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		buttons.clear();
 	}
 	
-	@EventHandler
-	public void onDrag(InventoryDragEvent e) {
-		List<Integer> slots = e.getRawSlots().stream().filter(s -> getInventory(e.getView(), s).equals(inventory)).toList();
+	public void onDrag(InventoryDragEvent e, List<Integer> slots) {
+		if(disableDragEvent){
+			e.setCancelled(true);
+			return;
+		}
 		if(slots.isEmpty()){
 			return;
 		}
@@ -595,9 +605,9 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		return null;
 	}
 	
-	@EventHandler
 	public void onClick(InventoryClickEvent e) { //NOSONAR
-		if(!inventory.equals(e.getView().getTopInventory())){
+		if(disableDragEvent){
+			e.setCancelled(true);
 			return;
 		}
 		if(disabledClickEvents.contains(e.getClick())){
@@ -654,13 +664,6 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 	 */
 	public void addPaginationGui(PaginationGui paginationGui) {
 		paginationGuis.add(paginationGui);
-	}
-	
-	@EventHandler
-	public void onClose(InventoryCloseEvent e) {
-		if(e.getInventory().equals(inventory) && destroyOnClose && e.getViewers().size() <= 1){
-			destroy((Player) e.getPlayer());
-		}
 	}
 	
 	//---------------Default Click Handlers----------------
@@ -795,38 +798,7 @@ public abstract class GuiInventory<T extends MenuProfile> implements Listener{
 		paginationGuis.clear();
 	}
 	
-	public boolean isDestroyed() {
-		return isDestroyed;
-	}
-	
-	public Inventory getInventory() {return inventory;}
-	
-	public void setOnDestroy(Runnable onDestroy) {
-		this.onDestroy = onDestroy;
-	}
-	
-	public void setOnClick(Consumer<InventoryClickEvent> onClick) {
-		this.onClick = onClick;
-	}
-	
-	public void setOnDragOpenSlot(Consumer<InventoryDragEvent> onDragOpenSlot) {this.onDragOpenSlot = onDragOpenSlot;}
-	
-	public void setOnPlayerInventoryClick(Consumer<InventoryClickEvent> onPlayerInventoryClick) {
-		this.onPlayerInventoryClick = onPlayerInventoryClick;
-	}
-	
-	public JavaPlugin getPlugin() {return plugin;}
-	
 	public Player getPlayer() {return profile.getOwner();}
 	
-	public T getProfile() {return profile;}
-	
-	public void setReturnItems(boolean returnItems) {this.returnItems = returnItems;}
-	
-	public void setDestroyOnClose(boolean destroyOnClose) {this.destroyOnClose = destroyOnClose;}
-	
-	public boolean isReturnItems() {return returnItems;}
-	
-	public boolean isDestroyOnClose() {return destroyOnClose;}
 }
 	

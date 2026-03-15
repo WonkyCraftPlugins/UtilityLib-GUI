@@ -1,8 +1,11 @@
 package com.wonkglorg.utilitylib.inventory;
 
+import lombok.Getter;
+
 /**
  * Enum representing valid sizes of an inventory.
  */
+@Getter
 public enum InventorySize{
 	ROWS_1(9),
 	ROWS_2(18),
@@ -17,7 +20,4 @@ public enum InventorySize{
 		this.size = size;
 	}
 	
-	public int getSize() {
-		return size;
-	}
 }
